@@ -3,1283 +3,494 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I Am A Toy - Spring Festival Fireworks</title>
+    <title>I Am A Toy - 马年烟花</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #000; overflow: hidden; cursor: crosshair; font-family: 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif; }
+        body { background: #0a0015; overflow: hidden; cursor: crosshair; }
         canvas { display: block; }
-        #title {
-            position: fixed;
-            top: 20px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-family: 'Georgia', serif;
-            font-size: 2.5em;
-            color: rgba(255, 255, 255, 0.08);
-            letter-spacing: 0.3em;
-            pointer-events: none;
-            text-transform: uppercase;
-            z-index: 10;
-        }
-        #hint {
-            position: fixed;
-            bottom: 20px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
-            font-size: 0.85em;
-            color: rgba(255, 255, 255, 0.15);
-            pointer-events: none;
-            z-index: 10;
-        }
 
-        /* Issue #7: Spring couplets */
         .couplet {
             position: fixed;
             writing-mode: vertical-rl;
-            font-family: 'KaiTi', 'STKaiti', 'Microsoft YaHei', serif;
-            font-size: 1.8em;
+            font-family: 'KaiTi', 'STKaiti', 'SimSun', serif;
+            font-size: 2.2em;
             color: #ffd700;
-            background: linear-gradient(180deg, #cc0000 0%, #990000 100%);
-            padding: 18px 12px;
-            border: 2px solid #ffd700;
-            border-radius: 6px;
+            background: linear-gradient(180deg, #cc0000 0%, #880000 100%);
+            padding: 20px 14px;
+            border: 2.5px solid #ffd700;
+            border-radius: 8px;
             z-index: 10;
             pointer-events: none;
-            opacity: 0.55;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-            letter-spacing: 0.15em;
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.1);
+            opacity: 0.7;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
+            letter-spacing: 0.2em;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.4), inset 0 0 15px rgba(255, 215, 0, 0.1);
         }
-        .couplet-left { left: 15px; top: 50%; transform: translateY(-50%); }
-        .couplet-right { right: 15px; top: 50%; transform: translateY(-50%); }
+        .couplet-left { left: 20px; top: 50%; transform: translateY(-50%); }
+        .couplet-right { right: 20px; top: 50%; transform: translateY(-50%); }
+
         #横批 {
             position: fixed;
-            top: 60px;
+            top: 25px;
             left: 50%;
             transform: translateX(-50%);
-            font-family: 'KaiTi', 'STKaiti', 'Microsoft YaHei', serif;
-            font-size: 2em;
+            font-family: 'KaiTi', 'STKaiti', 'SimSun', serif;
+            font-size: 2.4em;
             color: #ffd700;
-            background: linear-gradient(90deg, #cc0000, #990000);
-            padding: 10px 30px;
-            border: 2px solid #ffd700;
-            border-radius: 6px;
+            background: linear-gradient(90deg, #cc0000, #880000);
+            padding: 12px 40px;
+            border: 2.5px solid #ffd700;
+            border-radius: 8px;
             z-index: 10;
             pointer-events: none;
-            opacity: 0.55;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-            letter-spacing: 0.3em;
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
-        }
-        #fu-char {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(180deg);
-            font-family: 'KaiTi', 'STKaiti', 'Microsoft YaHei', serif;
-            font-size: 5em;
-            color: #ffd700;
-            background: #cc0000;
-            width: 100px;
-            height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 3px solid #ffd700;
-            border-radius: 8px;
-            z-index: 5;
-            pointer-events: none;
-            opacity: 0.15;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
-            transform-origin: center center;
+            opacity: 0.7;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
+            letter-spacing: 0.4em;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
         }
 
-        /* Issue #5: Sound toggle */
-        #sound-toggle {
+        #music-btn {
             position: fixed;
-            bottom: 15px;
-            right: 15px;
+            bottom: 20px;
+            right: 20px;
             z-index: 20;
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 1.4em;
-            width: 40px;
-            height: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.5em;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s;
+            backdrop-filter: blur(4px);
         }
-        #sound-toggle:hover { background: rgba(255,255,255,0.2); color: #fff; }
+        #music-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
 
-        /* Issue #9: Countdown */
-        #countdown {
+        #hint {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: 'Georgia', 'KaiTi', serif;
-            font-size: 3em;
-            color: rgba(255, 215, 0, 0.7);
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-            z-index: 15;
-            pointer-events: none;
+            bottom: 20px;
+            left: 0; right: 70px;
             text-align: center;
-            white-space: nowrap;
-            display: none;
-        }
-        #countdown.last-ten {
-            animation: pulse 1s ease-in-out infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.2); }
-        }
-        #happy-new-year {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: 'KaiTi', 'STKaiti', 'Microsoft YaHei', serif;
-            font-size: 4em;
-            color: #ffd700;
-            text-shadow: 0 0 30px rgba(255, 0, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.5);
-            z-index: 15;
+            font-family: 'Microsoft YaHei', sans-serif;
+            font-size: 0.8em;
+            color: rgba(255,255,255,0.12);
             pointer-events: none;
-            text-align: center;
-            display: none;
-            opacity: 0;
-            transition: opacity 1s;
+            z-index: 10;
         }
 
-        /* Mobile responsive */
         @media (max-width: 768px) {
-            .couplet { font-size: 1.2em; padding: 12px 8px; }
-            .couplet-left { left: 5px; }
-            .couplet-right { right: 5px; }
-            #横批 { font-size: 1.3em; padding: 8px 20px; top: 55px; }
-            #fu-char { font-size: 3em; width: 70px; height: 70px; }
-            #title { font-size: 1.5em; }
-            #countdown { font-size: 2em; }
-            #happy-new-year { font-size: 2.5em; }
+            .couplet { font-size: 1.4em; padding: 14px 10px; }
+            .couplet-left { left: 8px; }
+            .couplet-right { right: 8px; }
+            #横批 { font-size: 1.5em; padding: 8px 24px; }
         }
         @media (max-width: 480px) {
-            .couplet { display: none; }
-            #横批 { font-size: 1em; }
-            #fu-char { font-size: 2.5em; width: 55px; height: 55px; }
+            .couplet { font-size: 1.1em; padding: 10px 8px; }
+            #横批 { font-size: 1.2em; padding: 6px 16px; }
         }
     </style>
 </head>
 <body>
-    <div id="title">I Am A Toy</div>
-    <div id="hint">Click or tap anywhere to launch fireworks</div>
-
-    <!-- Issue #7: Couplets and Fu -->
     <div class="couplet couplet-left">骏马奔腾迎新岁</div>
     <div class="couplet couplet-right">春风送暖入万家</div>
     <div id="横批">马年大吉</div>
-    <div id="fu-char">福</div>
-
-    <!-- Issue #5: Sound toggle -->
-    <button id="sound-toggle" title="Toggle sound">🔇</button>
-
-    <!-- Issue #9: Countdown -->
-    <div id="countdown"></div>
-    <div id="happy-new-year">🎊 新年快乐 🎊<br><span style="font-size:0.5em">马年大吉 · 恭喜发财</span></div>
-
-    <canvas id="fireworks"></canvas>
+    <button id="music-btn" title="播放/暂停音乐">🔇</button>
+    <div id="hint">点击任意位置放烟花</div>
+    <canvas id="c"></canvas>
 
     <script>
-        const canvas = document.getElementById('fireworks');
-        const ctx = canvas.getContext('2d');
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+    const resize = () => { canvas.width = innerWidth; canvas.height = innerHeight; };
+    resize();
+    addEventListener('resize', resize);
 
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+    // ── Utilities ──
+    const rand = (a, b) => Math.random() * (b - a) + a;
+    const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+    // ── Color palettes ──
+    const palettes = [
+        ['#ff0040', '#ff355e', '#ff6b6b'],
+        ['#ff8c00', '#ffa500', '#ffd700'],
+        ['#00ff87', '#00e676', '#69f0ae'],
+        ['#00bfff', '#1e90ff', '#63b3ed'],
+        ['#bf00ff', '#9b59b6', '#c084fc'],
+        ['#ff1493', '#ff69b4', '#ff9ff3'],
+        ['#00ffff', '#00ced1', '#48dbfb'],
+        ['#ff0000', '#cc0000', '#ffd700'],  // 春节红金
+        ['#fff', '#ffd700', '#ffec8b'],
+    ];
+
+    // ── Stars ──
+    const stars = Array.from({length: 180}, () => ({
+        x: Math.random() * innerWidth,
+        y: Math.random() * innerHeight,
+        s: Math.random() * 1.2,
+        t: Math.random() * 6.28,
+        v: rand(0.01, 0.025)
+    }));
+
+    function drawStars() {
+        for (const s of stars) {
+            s.t += s.v;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.s, 0, 6.28);
+            ctx.fillStyle = `rgba(255,255,255,${0.25 + Math.sin(s.t) * 0.25})`;
+            ctx.fill();
         }
-        resize();
-        window.addEventListener('resize', resize);
+    }
 
-        const particles = [];
-        const rockets = [];
-        const stars = [];
-        const glowOrbs = [];
-        const redPackets = [];
-        const lanterns = [];
-        const horses = [];
+    // ── Particles ──
+    const particles = [];
 
-        // ========== Issue #5: Sound System ==========
-        let audioCtx = null;
-        let soundEnabled = localStorage.getItem('i-am-a-toy-sound') === 'true';
-        const soundToggle = document.getElementById('sound-toggle');
-        soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+    class Particle {
+        constructor(x, y, angle, speed, color, decay, size) {
+            this.x = x; this.y = y;
+            this.vx = Math.cos(angle) * speed;
+            this.vy = Math.sin(angle) * speed;
+            this.color = color;
+            this.alpha = 1;
+            this.decay = decay || rand(0.008, 0.02);
+            this.size = size || rand(1.5, 3);
+            this.gravity = 0.035;
+            this.friction = 0.985;
+        }
+        update() {
+            this.vx *= this.friction;
+            this.vy *= this.friction;
+            this.vy += this.gravity;
+            this.x += this.vx;
+            this.y += this.vy;
+            this.alpha -= this.decay;
+            return this.alpha > 0;
+        }
+        draw() {
+            ctx.globalAlpha = this.alpha;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size * this.alpha, 0, 6.28);
+            ctx.fillStyle = this.color;
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = this.color;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1;
+        }
+    }
 
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // ── Rockets & Explosions ──
+    const rockets = [];
+    const flashes = [];
+
+    class Rocket {
+        constructor(sx, tx, ty) {
+            this.x = sx || rand(innerWidth * 0.15, innerWidth * 0.85);
+            this.y = innerHeight + 5;
+            this.tx = tx || this.x + rand(-40, 40);
+            this.ty = ty || rand(innerHeight * 0.08, innerHeight * 0.4);
+            const a = Math.atan2(this.ty - this.y, this.tx - this.x);
+            const spd = rand(5.5, 8);
+            this.vx = Math.cos(a) * spd;
+            this.vy = Math.sin(a) * spd;
+            this.palette = pick(palettes);
+            this.trail = [];
+            this.alive = true;
+            playLaunch();
+        }
+        update() {
+            this.trail.push({x: this.x, y: this.y, a: 1});
+            if (this.trail.length > 15) this.trail.shift();
+            this.x += this.vx;
+            this.y += this.vy;
+            // Spark trail
+            if (Math.random() > 0.5) {
+                particles.push(new Particle(this.x, this.y, rand(0, 6.28), rand(0.2, 0.6), '#ffd700', 0.05, rand(0.5, 1.2)));
+            }
+            if (Math.hypot(this.tx - this.x, this.ty - this.y) < 10 || this.y <= this.ty) {
+                this.alive = false;
+                this.explode();
+            }
+            this.trail.forEach(t => t.a -= 0.07);
+        }
+        explode() {
+            const p = this.palette;
+            const cx = this.x, cy = this.y;
+            flashes.push({x: cx, y: cy, r: 5, mr: 120, a: 0.35, c: p[0]});
+            playBoom();
+
+            const type = Math.floor(rand(0, 5));
+            switch (type) {
+                case 0: { // Spherical
+                    const n = Math.floor(rand(90, 160));
+                    for (let i = 0; i < n; i++) {
+                        const a = (6.28 / n) * i + rand(-0.1, 0.1);
+                        particles.push(new Particle(cx, cy, a, rand(1.5, 5.5), pick(p)));
+                    }
+                    break;
+                }
+                case 1: { // Chrysanthemum
+                    for (let i = 0; i < 200; i++) {
+                        const a = (6.28 / 200) * i;
+                        const pp = new Particle(cx, cy, a, rand(1, 6), pick(p), rand(0.004, 0.011));
+                        pp.gravity = 0.02;
+                        particles.push(pp);
+                    }
+                    break;
+                }
+                case 2: { // Ring
+                    for (let i = 0; i < 80; i++) {
+                        const a = (6.28 / 80) * i;
+                        particles.push(new Particle(cx, cy, a, rand(3.5, 4.5), pick(p)));
+                    }
+                    break;
+                }
+                case 3: { // Willow (gold droop)
+                    for (let i = 0; i < 140; i++) {
+                        const a = (6.28 / 140) * i + rand(-0.1, 0.1);
+                        const pp = new Particle(cx, cy, a, rand(2, 5), '#ffd700', rand(0.003, 0.007));
+                        pp.gravity = 0.055;
+                        pp.size = rand(1, 2);
+                        particles.push(pp);
+                    }
+                    break;
+                }
+                case 4: { // Palm
+                    const br = Math.floor(rand(5, 8));
+                    for (let b = 0; b < br; b++) {
+                        const ba = (6.28 / br) * b;
+                        for (let i = 0; i < 22; i++) {
+                            const pp = new Particle(cx, cy, ba + rand(-0.12, 0.12), rand(2, 6), pick(p));
+                            pp.gravity = 0.05;
+                            particles.push(pp);
+                        }
+                    }
+                    break;
+                }
             }
         }
-
-        function playLaunchSound() {
-            if (!soundEnabled || !audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.3);
-            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.35);
-        }
-
-        function playExplosionSound(size) {
-            if (!soundEnabled || !audioCtx) return;
-            const bufferSize = audioCtx.sampleRate * 0.3;
-            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-            const data = buffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) {
-                data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.15));
+        draw() {
+            for (const t of this.trail) {
+                if (t.a <= 0) continue;
+                ctx.beginPath();
+                ctx.arc(t.x, t.y, 1.5, 0, 6.28);
+                ctx.fillStyle = `rgba(255,220,100,${t.a * 0.5})`;
+                ctx.fill();
             }
-            const source = audioCtx.createBufferSource();
-            source.buffer = buffer;
-            const filter = audioCtx.createBiquadFilter();
-            filter.type = 'lowpass';
-            filter.frequency.value = 400 + (size || 1) * 200;
-            const gain = audioCtx.createGain();
-            gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
-            source.connect(filter);
-            filter.connect(gain);
-            gain.connect(audioCtx.destination);
-            source.start();
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 2.5, 0, 6.28);
+            ctx.fillStyle = '#fff';
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = '#ffd700';
+            ctx.fill();
+            ctx.shadowBlur = 0;
         }
+    }
 
-        function playFirecrackerSound() {
-            if (!soundEnabled || !audioCtx) return;
-            const bufferSize = audioCtx.sampleRate * 0.08;
-            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-            const data = buffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) {
-                data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.05));
-            }
-            const source = audioCtx.createBufferSource();
-            source.buffer = buffer;
-            const gain = audioCtx.createGain();
-            gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-            source.connect(gain);
-            gain.connect(audioCtx.destination);
-            source.start();
-        }
+    // ── Audio (Web Audio API — no external files) ──
+    let audioCtx = null;
+    let musicPlaying = false;
+    let musicNodes = null;
 
-        function playBellSound() {
-            if (!soundEnabled || !audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.value = 220;
-            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 3);
-            // Overtone
-            const osc2 = audioCtx.createOscillator();
-            const gain2 = audioCtx.createGain();
-            osc2.type = 'sine';
-            osc2.frequency.value = 440;
-            gain2.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2);
-            osc2.connect(gain2);
-            gain2.connect(audioCtx.destination);
-            osc2.start();
-            osc2.stop(audioCtx.currentTime + 2);
-        }
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (AudioContext || webkitAudioContext)();
+    }
 
-        soundToggle.addEventListener('click', () => {
-            initAudio();
-            soundEnabled = !soundEnabled;
-            localStorage.setItem('i-am-a-toy-sound', soundEnabled);
-            soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
-        });
+    function playLaunch() {
+        if (!audioCtx) return;
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = 'sine';
+        o.frequency.setValueAtTime(350, audioCtx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime + 0.25);
+        g.gain.setValueAtTime(0.06, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        o.connect(g).connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + 0.3);
+    }
 
-        // ========== Color Palettes ==========
-        const palettes = [
-            ['#ff0040', '#ff355e', '#ff6b6b', '#ffaaaa'],
-            ['#ff8c00', '#ffa500', '#ffd700', '#ffec8b'],
-            ['#00ff87', '#00e676', '#69f0ae', '#b9f6ca'],
-            ['#00bfff', '#1e90ff', '#63b3ed', '#90cdf4'],
-            ['#bf00ff', '#9b59b6', '#c084fc', '#e9d5ff'],
-            ['#ff1493', '#ff69b4', '#ff9ff3', '#ffc0cb'],
-            ['#00ffff', '#00ced1', '#48dbfb', '#7efff5'],
-            ['#ff4500', '#ff6347', '#ff7f50', '#ffa07a'],
-            ['#fff', '#e0e0e0', '#c0c0c0', '#ffd700'],
-            ['#ff0040', '#ffd700', '#00ff87', '#00bfff', '#bf00ff'],
-            // Issue #8: Spring Festival palette
-            ['#ff0000', '#cc0000', '#ffd700', '#ff6600']
+    function playBoom() {
+        if (!audioCtx) return;
+        const n = audioCtx.sampleRate * 0.25;
+        const buf = audioCtx.createBuffer(1, n, audioCtx.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (n * 0.12));
+        const s = audioCtx.createBufferSource();
+        s.buffer = buf;
+        const f = audioCtx.createBiquadFilter();
+        f.type = 'lowpass'; f.frequency.value = 600;
+        const g = audioCtx.createGain();
+        g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+        s.connect(f).connect(g).connect(audioCtx.destination);
+        s.start();
+    }
+
+    // Simple pentatonic melody loop (春节风格)
+    function startMusic() {
+        if (!audioCtx || musicPlaying) return;
+        musicPlaying = true;
+
+        const masterGain = audioCtx.createGain();
+        masterGain.gain.value = 0.08;
+        masterGain.connect(audioCtx.destination);
+
+        // Pentatonic scale notes (C D E G A) in different octaves
+        const notes = [
+            523.25, 587.33, 659.25, 783.99, 880.00,  // C5 D5 E5 G5 A5
+            1046.50, 880.00, 783.99, 659.25, 587.33,  // C6 A5 G5 E5 D5
+            523.25, 659.25, 783.99, 880.00, 783.99,   // C5 E5 G5 A5 G5
+            659.25, 523.25, 587.33, 523.25, 440.00,   // E5 C5 D5 C5 A4
+        ];
+        const durations = [
+            0.3, 0.3, 0.3, 0.3, 0.6,
+            0.3, 0.3, 0.3, 0.3, 0.6,
+            0.3, 0.3, 0.3, 0.3, 0.6,
+            0.3, 0.3, 0.3, 0.3, 0.8,
         ];
 
-        function randomPalette() { return palettes[Math.floor(Math.random() * palettes.length)]; }
-        function randomFrom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-        function rand(min, max) { return Math.random() * (max - min) + min; }
+        let noteIndex = 0;
+        let scheduledTime = audioCtx.currentTime + 0.5;
 
-        // ========== Starfield ==========
-        function initStars() {
-            for (let i = 0; i < 200; i++) {
-                stars.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    size: Math.random() * 1.5,
-                    twinkle: Math.random() * Math.PI * 2,
-                    speed: rand(0.01, 0.03)
-                });
+        function scheduleChunk() {
+            if (!musicPlaying) return;
+            const chunkEnd = audioCtx.currentTime + 4;
+            while (scheduledTime < chunkEnd) {
+                const freq = notes[noteIndex % notes.length];
+                const dur = durations[noteIndex % durations.length];
+
+                const osc = audioCtx.createOscillator();
+                const env = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.value = freq;
+                env.gain.setValueAtTime(0.001, scheduledTime);
+                env.gain.exponentialRampToValueAtTime(1, scheduledTime + 0.03);
+                env.gain.exponentialRampToValueAtTime(0.001, scheduledTime + dur * 0.9);
+                osc.connect(env).connect(masterGain);
+                osc.start(scheduledTime);
+                osc.stop(scheduledTime + dur);
+
+                scheduledTime += dur;
+                noteIndex++;
             }
-        }
-        initStars();
-
-        function drawStars() {
-            stars.forEach(s => {
-                s.twinkle += s.speed;
-                const alpha = 0.3 + Math.sin(s.twinkle) * 0.3;
-                ctx.beginPath();
-                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-                ctx.fill();
-            });
+            musicNodes.timer = setTimeout(scheduleChunk, 2000);
         }
 
-        // ========== Issue #3: Lanterns ==========
-        function initLanterns() {
-            const chars = ['福', '春', '喜', '乐', '财', '旺'];
-            const positions = [
-                { x: 0.06, y: 0.2 }, { x: 0.08, y: 0.38 },
-                { x: 0.94, y: 0.2 }, { x: 0.92, y: 0.38 },
-                { x: 0.12, y: 0.15 }, { x: 0.88, y: 0.15 }
-            ];
-            positions.forEach((pos, i) => {
-                lanterns.push({
-                    x: pos.x * canvas.width,
-                    y: pos.y * canvas.height,
-                    size: rand(25, 40),
-                    char: chars[i % chars.length],
-                    swingOffset: Math.random() * Math.PI * 2,
-                    swingSpeed: rand(0.008, 0.015)
-                });
-            });
+        musicNodes = { masterGain, timer: null };
+        scheduleChunk();
+    }
+
+    function stopMusic() {
+        musicPlaying = false;
+        if (musicNodes) {
+            clearTimeout(musicNodes.timer);
+            musicNodes.masterGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+            musicNodes = null;
         }
-        initLanterns();
+    }
 
-        function drawLanterns(timestamp) {
-            lanterns.forEach(l => {
-                const swing = Math.sin((timestamp || 0) * 0.001 + l.swingOffset) * 8;
-                const cx = l.x + swing;
-                const cy = l.y;
-                const s = l.size;
-
-                ctx.save();
-                ctx.globalAlpha = 0.6;
-
-                // Glow
-                const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, s * 2.5);
-                glow.addColorStop(0, 'rgba(255, 50, 0, 0.15)');
-                glow.addColorStop(1, 'rgba(255, 50, 0, 0)');
-                ctx.fillStyle = glow;
-                ctx.fillRect(cx - s * 2.5, cy - s * 2.5, s * 5, s * 5);
-
-                // String
-                ctx.strokeStyle = '#ffd700';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(cx, cy - s * 1.2);
-                ctx.lineTo(cx, cy - s * 0.7);
-                ctx.stroke();
-
-                // Body
-                ctx.beginPath();
-                ctx.ellipse(cx, cy, s * 0.6, s, 0, 0, Math.PI * 2);
-                const bodyGrad = ctx.createRadialGradient(cx - s * 0.15, cy - s * 0.2, 0, cx, cy, s);
-                bodyGrad.addColorStop(0, '#ff3333');
-                bodyGrad.addColorStop(1, '#cc0000');
-                ctx.fillStyle = bodyGrad;
-                ctx.fill();
-                ctx.strokeStyle = '#ffd700';
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-
-                // Ribs
-                ctx.strokeStyle = 'rgba(255, 215, 0, 0.4)';
-                ctx.lineWidth = 0.8;
-                for (let i = -2; i <= 2; i++) {
-                    ctx.beginPath();
-                    ctx.moveTo(cx - s * 0.55, cy + i * s * 0.25);
-                    ctx.quadraticCurveTo(cx, cy + i * s * 0.25 - 3, cx + s * 0.55, cy + i * s * 0.25);
-                    ctx.stroke();
-                }
-
-                // Character
-                ctx.font = `bold ${s * 0.7}px KaiTi, STKaiti, serif`;
-                ctx.fillStyle = '#ffd700';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(l.char, cx, cy);
-
-                // Top cap
-                ctx.fillStyle = '#ffd700';
-                ctx.fillRect(cx - s * 0.3, cy - s * 0.72, s * 0.6, s * 0.08);
-
-                // Bottom cap
-                ctx.fillRect(cx - s * 0.3, cy + s * 0.65, s * 0.6, s * 0.08);
-
-                // Tassel
-                ctx.strokeStyle = '#ffd700';
-                ctx.lineWidth = 1.5;
-                const tasselTop = cy + s * 0.73;
-                ctx.beginPath();
-                ctx.moveTo(cx, tasselTop);
-                ctx.lineTo(cx, tasselTop + s * 0.4);
-                ctx.stroke();
-                for (let i = -1; i <= 1; i++) {
-                    ctx.beginPath();
-                    ctx.moveTo(cx, tasselTop + s * 0.4);
-                    ctx.quadraticCurveTo(cx + i * s * 0.15, tasselTop + s * 0.55, cx + i * s * 0.1, tasselTop + s * 0.65);
-                    ctx.stroke();
-                }
-
-                ctx.restore();
-            });
+    const musicBtn = document.getElementById('music-btn');
+    musicBtn.addEventListener('click', () => {
+        initAudio();
+        if (musicPlaying) {
+            stopMusic();
+            musicBtn.textContent = '🔇';
+        } else {
+            startMusic();
+            musicBtn.textContent = '🎵';
         }
+    });
 
-        // ========== Issue #2: Red Packets ==========
-        class RedPacket {
-            constructor() {
-                this.x = rand(50, canvas.width - 50);
-                this.y = -60;
-                this.width = rand(30, 50);
-                this.height = this.width * 1.5;
-                this.vy = rand(1.5, 3.5);
-                this.vx = rand(-0.3, 0.3);
-                this.swingPhase = Math.random() * Math.PI * 2;
-                this.swingSpeed = rand(0.02, 0.04);
-                this.rotation = rand(-0.15, 0.15);
-                this.alive = true;
-                this.alpha = 1;
-                this.blessings = ['福', '财', '喜', '旺', '吉'];
-                this.char = randomFrom(this.blessings);
-                this.clicked = false;
-                this.clickMessage = '';
-                this.clickAlpha = 0;
-                this.clickY = 0;
-            }
-
-            update() {
-                if (this.clicked) {
-                    this.clickAlpha -= 0.015;
-                    this.clickY -= 1;
-                    if (this.clickAlpha <= 0) this.alive = false;
-                    return;
-                }
-                this.y += this.vy;
-                this.x += Math.sin(this.swingPhase) * 0.5 + this.vx;
-                this.swingPhase += this.swingSpeed;
-                if (this.y > canvas.height + 80) this.alive = false;
-            }
-
-            draw() {
-                if (this.clicked) {
-                    ctx.save();
-                    ctx.globalAlpha = this.clickAlpha;
-                    ctx.font = 'bold 20px Microsoft YaHei, PingFang SC, sans-serif';
-                    ctx.fillStyle = '#ffd700';
-                    ctx.textAlign = 'center';
-                    ctx.shadowBlur = 10;
-                    ctx.shadowColor = '#ff0000';
-                    ctx.fillText(this.clickMessage, this.x, this.clickY);
-                    ctx.shadowBlur = 0;
-                    ctx.restore();
-                    return;
-                }
-
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.rotation + Math.sin(this.swingPhase) * 0.05);
-
-                const w = this.width, h = this.height;
-                const r = 4;
-
-                // Shadow
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = 'rgba(255, 0, 0, 0.4)';
-
-                // Body
-                ctx.beginPath();
-                ctx.roundRect(-w/2, -h/2, w, h, r);
-                const grad = ctx.createLinearGradient(-w/2, -h/2, w/2, h/2);
-                grad.addColorStop(0, '#ee0000');
-                grad.addColorStop(1, '#cc0000');
-                ctx.fillStyle = grad;
-                ctx.fill();
-                ctx.shadowBlur = 0;
-
-                // Gold trim
-                ctx.strokeStyle = '#ffd700';
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-
-                // Gold circle
-                ctx.beginPath();
-                ctx.arc(0, -h * 0.05, w * 0.25, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
-                ctx.fill();
-                ctx.strokeStyle = '#ffd700';
-                ctx.lineWidth = 1;
-                ctx.stroke();
-
-                // Character
-                ctx.font = `bold ${w * 0.45}px KaiTi, STKaiti, serif`;
-                ctx.fillStyle = '#ffd700';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(this.char, 0, -h * 0.05);
-
-                ctx.restore();
-            }
-
-            hitTest(mx, my) {
-                return Math.abs(mx - this.x) < this.width / 2 && Math.abs(my - this.y) < this.height / 2;
-            }
-
-            onClick() {
-                const messages = ['恭喜发财', '万事如意', '马年大吉', '新年快乐', '阖家幸福', '财源广进'];
-                this.clicked = true;
-                this.clickMessage = randomFrom(messages);
-                this.clickAlpha = 1.5;
-                this.clickY = this.y;
-                // Spawn mini explosion
-                for (let i = 0; i < 15; i++) {
-                    const angle = rand(0, Math.PI * 2);
-                    const speed = rand(1, 3);
-                    particles.push(new Particle(this.x, this.y, angle, speed, randomFrom(['#ffd700', '#ff0000', '#ff6600']), 0.025, rand(1, 2.5)));
-                }
+    // ── Click/tap to launch ──
+    canvas.addEventListener('click', e => {
+        initAudio();
+        const n = Math.floor(rand(2, 5));
+        for (let i = 0; i < n; i++) {
+            rockets.push(new Rocket(
+                rand(innerWidth * 0.2, innerWidth * 0.8),
+                e.clientX + rand(-60, 60),
+                e.clientY + rand(-40, 40)
+            ));
+        }
+    });
+    canvas.addEventListener('touchstart', e => {
+        e.preventDefault();
+        initAudio();
+        for (const t of e.touches) {
+            const n = Math.floor(rand(2, 4));
+            for (let i = 0; i < n; i++) {
+                rockets.push(new Rocket(
+                    rand(innerWidth * 0.2, innerWidth * 0.8),
+                    t.clientX + rand(-60, 60),
+                    t.clientY + rand(-40, 40)
+                ));
             }
         }
+    });
 
-        let redPacketTimer = 0;
-        const RED_PACKET_INTERVAL = 400;
+    // ── Auto-launch ──
+    let lastLaunch = 0, interval = 600;
+    let burstMode = false, burstTimer = 0;
+    setInterval(() => { burstMode = true; burstTimer = 50; }, 10000);
 
-        // ========== Issue #6: Horse Class (马年) ==========
-        class Horse {
-            constructor() {
-                const startX = Math.random() < 0.5 ? -60 : canvas.width + 60;
-                this.x = startX;
-                this.y = rand(canvas.height * 0.3, canvas.height * 0.6);
-                this.direction = startX < 0 ? 1 : -1;
-                this.speed = rand(4, 7);
-                this.phase = 0;
-                this.gallopSpeed = rand(0.12, 0.18);
-                this.alive = true;
-                this.trail = [];
-                this.sparkTimer = 0;
-            }
+    // ── Main loop ──
+    function animate(ts) {
+        // Fade sky
+        const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        g.addColorStop(0, 'rgba(10, 0, 21, 0.22)');
+        g.addColorStop(1, 'rgba(5, 0, 12, 0.22)');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            update() {
-                this.phase += this.gallopSpeed;
-                // Galloping motion: bounding up and down
-                const gallopY = Math.abs(Math.sin(this.phase)) * -25;
-                this.x += this.speed * this.direction;
-                this.y += gallopY * 0.15;
+        drawStars();
 
-                // Spark trail from hooves
-                this.sparkTimer++;
-                if (this.sparkTimer % 3 === 0) {
-                    this.trail.push({
-                        x: this.x - this.direction * 15,
-                        y: this.y + 12,
-                        alpha: 1,
-                        size: rand(1, 3)
-                    });
-                    if (this.trail.length > 20) this.trail.shift();
-                }
-                this.trail.forEach(t => t.alpha -= 0.05);
-
-                if ((this.direction > 0 && this.x > canvas.width + 80) ||
-                    (this.direction < 0 && this.x < -80)) {
-                    this.alive = false;
-                }
-            }
-
-            draw() {
-                ctx.save();
-                const gallopBob = Math.sin(this.phase) * 5;
-                const legPhase = this.phase;
-
-                // Trail sparks (hoofprints)
-                for (const t of this.trail) {
-                    if (t.alpha <= 0) continue;
-                    ctx.beginPath();
-                    ctx.arc(t.x, t.y, t.size, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(255, 215, 0, ${t.alpha * 0.6})`;
-                    ctx.shadowBlur = 5;
-                    ctx.shadowColor = '#ffd700';
-                    ctx.fill();
-                }
-                ctx.shadowBlur = 0;
-
-                const hx = this.x;
-                const hy = this.y + gallopBob;
-                const dir = this.direction;
-
-                ctx.globalAlpha = 0.8;
-
-                // Body (ellipse)
-                ctx.beginPath();
-                ctx.ellipse(hx, hy, 22, 12, 0, 0, Math.PI * 2);
-                const bodyGrad = ctx.createRadialGradient(hx, hy - 3, 0, hx, hy, 15);
-                bodyGrad.addColorStop(0, '#ffd700');
-                bodyGrad.addColorStop(1, '#cc8800');
-                ctx.fillStyle = bodyGrad;
-                ctx.shadowBlur = 12;
-                ctx.shadowColor = '#ffd700';
-                ctx.fill();
-                ctx.shadowBlur = 0;
-
-                // Head
-                ctx.beginPath();
-                ctx.ellipse(hx + dir * 25, hy - 8, 8, 10, dir * -0.3, 0, Math.PI * 2);
-                ctx.fillStyle = '#e6b800';
-                ctx.fill();
-
-                // Eye
-                ctx.beginPath();
-                ctx.arc(hx + dir * 28, hy - 11, 1.5, 0, Math.PI * 2);
-                ctx.fillStyle = '#330000';
-                ctx.fill();
-
-                // Ear
-                ctx.beginPath();
-                ctx.moveTo(hx + dir * 25, hy - 18);
-                ctx.lineTo(hx + dir * 28, hy - 25);
-                ctx.lineTo(hx + dir * 22, hy - 20);
-                ctx.fillStyle = '#cc8800';
-                ctx.fill();
-
-                // Mane (flowing hair)
-                ctx.strokeStyle = '#ff6600';
-                ctx.lineWidth = 2;
-                for (let i = 0; i < 6; i++) {
-                    const mx = hx + dir * (15 - i * 4);
-                    const maneWave = Math.sin(this.phase + i * 0.5) * 4;
-                    ctx.beginPath();
-                    ctx.moveTo(mx, hy - 12);
-                    ctx.quadraticCurveTo(mx - dir * 5, hy - 20 + maneWave, mx - dir * 10, hy - 15 + maneWave);
-                    ctx.stroke();
-                }
-
-                // Legs (galloping animation)
-                ctx.strokeStyle = '#cc8800';
-                ctx.lineWidth = 3;
-                const legOffsets = [
-                    { x: -10, phase: 0 },
-                    { x: -5, phase: Math.PI * 0.5 },
-                    { x: 8, phase: Math.PI },
-                    { x: 13, phase: Math.PI * 1.5 }
-                ];
-                for (const leg of legOffsets) {
-                    const lx = hx + dir * leg.x;
-                    const legSwing = Math.sin(legPhase + leg.phase) * 8;
-                    ctx.beginPath();
-                    ctx.moveTo(lx, hy + 10);
-                    ctx.lineTo(lx + legSwing * dir * 0.5, hy + 22 + Math.abs(legSwing) * 0.3);
-                    ctx.stroke();
-                }
-
-                // Tail (flowing)
-                ctx.strokeStyle = '#ff6600';
-                ctx.lineWidth = 2;
-                for (let i = 0; i < 4; i++) {
-                    const tailWave = Math.sin(this.phase * 0.8 + i * 0.4) * 6;
-                    ctx.beginPath();
-                    ctx.moveTo(hx - dir * 20, hy);
-                    ctx.quadraticCurveTo(
-                        hx - dir * (30 + i * 3), hy + tailWave,
-                        hx - dir * (38 + i * 5), hy - 5 + tailWave * 1.5
-                    );
-                    ctx.stroke();
-                }
-
-                ctx.restore();
-            }
+        // Flashes
+        for (let i = flashes.length - 1; i >= 0; i--) {
+            const f = flashes[i];
+            f.r += (f.mr - f.r) * 0.1;
+            f.a *= 0.9;
+            if (f.a < 0.01) { flashes.splice(i, 1); continue; }
+            ctx.globalAlpha = f.a * 0.25;
+            ctx.beginPath();
+            ctx.arc(f.x, f.y, f.r, 0, 6.28);
+            ctx.fillStyle = f.c;
+            ctx.fill();
+            ctx.globalAlpha = 1;
         }
 
-        let horseTimer = 0;
-        const HORSE_INTERVAL = 500;
-
-        // ========== Explosion Types ==========
-        const EXPLOSION_TYPES = [
-            'spherical', 'ring', 'chrysanthemum', 'willow', 'palm',
-            'heart', 'spiral', 'double_ring', 'crossette', 'kamuro',
-            'chinese_knot', 'firecracker', 'text_blessing', 'horse'
-        ];
-
-        // Issue #4: Text blessing helpers
-        const blessingTexts = ['新年快乐', '恭喜发财', '马年大吉', '万事如意', '阖家幸福', '马到成功'];
-        const offscreenCanvas = document.createElement('canvas');
-        const offscreenCtx = offscreenCanvas.getContext('2d');
-        offscreenCanvas.width = 200;
-        offscreenCanvas.height = 60;
-
-        function getTextPixels(text) {
-            offscreenCtx.clearRect(0, 0, 200, 60);
-            offscreenCtx.font = 'bold 32px Microsoft YaHei, PingFang SC, sans-serif';
-            offscreenCtx.fillStyle = '#fff';
-            offscreenCtx.textAlign = 'center';
-            offscreenCtx.textBaseline = 'middle';
-            offscreenCtx.fillText(text, 100, 30);
-            const imageData = offscreenCtx.getImageData(0, 0, 200, 60);
-            const points = [];
-            for (let y = 0; y < 60; y += 2) {
-                for (let x = 0; x < 200; x += 2) {
-                    if (imageData.data[(y * 200 + x) * 4 + 3] > 128) {
-                        points.push({ x: (x - 100) * 1.2, y: (y - 30) * 1.2 });
-                    }
-                }
+        // Auto-launch
+        if (burstMode) {
+            burstTimer--;
+            if (burstTimer <= 0) burstMode = false;
+            if (ts - lastLaunch > 90) {
+                for (let i = 0; i < Math.floor(rand(2, 4)); i++) rockets.push(new Rocket());
+                lastLaunch = ts;
             }
-            return points;
+        } else if (ts - lastLaunch > interval) {
+            for (let i = 0; i < Math.floor(rand(1, 3)); i++) rockets.push(new Rocket());
+            lastLaunch = ts;
+            interval = rand(400, 900);
         }
 
-        class Rocket {
-            constructor(startX, targetX, targetY) {
-                this.x = startX || rand(canvas.width * 0.1, canvas.width * 0.9);
-                this.y = canvas.height + 10;
-                this.targetX = targetX || this.x + rand(-50, 50);
-                this.targetY = targetY || rand(canvas.height * 0.08, canvas.height * 0.42);
-                this.speed = rand(5, 8);
-                this.angle = Math.atan2(this.targetY - this.y, this.targetX - this.x);
-                this.vx = Math.cos(this.angle) * this.speed;
-                this.vy = Math.sin(this.angle) * this.speed;
-                this.palette = randomPalette();
-                this.trail = [];
-                this.alive = true;
-                this.sparkTimer = 0;
-                this.launched = false;
-            }
-
-            update() {
-                if (!this.launched) {
-                    this.launched = true;
-                    playLaunchSound();
-                }
-                this.trail.push({ x: this.x, y: this.y, alpha: 1, size: rand(1, 2.5) });
-                if (this.trail.length > 18) this.trail.shift();
-
-                this.x += this.vx;
-                this.y += this.vy;
-
-                this.sparkTimer++;
-                if (this.sparkTimer % 2 === 0) {
-                    particles.push(new Particle(
-                        this.x + rand(-2, 2), this.y,
-                        rand(0, Math.PI * 2), rand(0.2, 0.8),
-                        '#ffd700', 0.06, rand(0.5, 1.5), 0.02
-                    ));
-                }
-
-                const dist = Math.hypot(this.targetX - this.x, this.targetY - this.y);
-                if (dist < 10 || this.y <= this.targetY) {
-                    this.alive = false;
-                    this.explode();
-                }
-                this.trail.forEach(t => t.alpha -= 0.06);
-            }
-
-            explode() {
-                const type = randomFrom(EXPLOSION_TYPES);
-                const palette = this.palette;
-                const cx = this.x, cy = this.y;
-                const cnyPalette = ['#ff0000', '#cc0000', '#ffd700', '#ff6600'];
-
-                glowOrbs.push({ x: cx, y: cy, radius: 5, maxRadius: 150, alpha: 0.4, color: palette[0] });
-                playExplosionSound(2);
-
-                switch (type) {
-                    case 'spherical': {
-                        const count = Math.floor(rand(80, 150));
-                        for (let i = 0; i < count; i++) {
-                            const angle = (Math.PI * 2 / count) * i + rand(-0.1, 0.1);
-                            particles.push(new Particle(cx, cy, angle, rand(1.5, 5.5), randomFrom(palette)));
-                        }
-                        break;
-                    }
-                    case 'ring': {
-                        const count = 80;
-                        for (let i = 0; i < count; i++) {
-                            const angle = (Math.PI * 2 / count) * i;
-                            particles.push(new Particle(cx, cy, angle, rand(3.5, 4.5), randomFrom(palette)));
-                        }
-                        break;
-                    }
-                    case 'chrysanthemum': {
-                        const count = 200;
-                        for (let i = 0; i < count; i++) {
-                            const angle = (Math.PI * 2 / count) * i;
-                            const p = new Particle(cx, cy, angle, rand(1, 6), randomFrom(palette), rand(0.004, 0.012));
-                            p.gravity = 0.02;
-                            particles.push(p);
-                        }
-                        break;
-                    }
-                    case 'willow': {
-                        const count = 150;
-                        for (let i = 0; i < count; i++) {
-                            const angle = (Math.PI * 2 / count) * i + rand(-0.15, 0.15);
-                            const p = new Particle(cx, cy, angle, rand(2, 5), '#ffd700', rand(0.003, 0.008));
-                            p.gravity = 0.06;
-                            p.size = rand(1, 2);
-                            particles.push(p);
-                        }
-                        break;
-                    }
-                    case 'palm': {
-                        const branches = Math.floor(rand(5, 9));
-                        for (let b = 0; b < branches; b++) {
-                            const branchAngle = (Math.PI * 2 / branches) * b;
-                            for (let i = 0; i < 25; i++) {
-                                const p = new Particle(cx, cy, branchAngle + rand(-0.15, 0.15), rand(2, 6), randomFrom(palette));
-                                p.gravity = 0.05;
-                                particles.push(p);
-                            }
-                        }
-                        break;
-                    }
-                    case 'heart': {
-                        const count = 120;
-                        for (let i = 0; i < count; i++) {
-                            const t = (i / count) * Math.PI * 2;
-                            const hx = 16 * Math.pow(Math.sin(t), 3);
-                            const hy = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
-                            const angle = Math.atan2(hy, hx);
-                            const speed = Math.hypot(hx, hy) * 0.2;
-                            particles.push(new Particle(cx, cy, angle, speed, randomFrom(palette), rand(0.006, 0.014)));
-                        }
-                        break;
-                    }
-                    case 'spiral': {
-                        const arms = Math.floor(rand(2, 5));
-                        for (let a = 0; a < arms; a++) {
-                            const baseAngle = (Math.PI * 2 / arms) * a;
-                            for (let i = 0; i < 40; i++) {
-                                particles.push(new Particle(cx, cy, baseAngle + i * 0.15, 1 + i * 0.1, randomFrom(palette), rand(0.008, 0.015)));
-                            }
-                        }
-                        break;
-                    }
-                    case 'double_ring': {
-                        for (let ring = 0; ring < 2; ring++) {
-                            const count = 60;
-                            const speed = ring === 0 ? rand(2.5, 3.5) : rand(4, 5.5);
-                            const color = ring === 0 ? palette[0] : palette[palette.length - 1];
-                            for (let i = 0; i < count; i++) {
-                                particles.push(new Particle(cx, cy, (Math.PI * 2 / count) * i, speed, color));
-                            }
-                        }
-                        break;
-                    }
-                    case 'crossette': {
-                        const count = 30;
-                        for (let i = 0; i < count; i++) {
-                            const p = new Particle(cx, cy, (Math.PI * 2 / count) * i, rand(3, 5), randomFrom(palette), 0.015);
-                            p.willSplit = true;
-                            p.splitTimer = Math.floor(rand(15, 30));
-                            particles.push(p);
-                        }
-                        break;
-                    }
-                    case 'kamuro': {
-                        const count = 250;
-                        for (let i = 0; i < count; i++) {
-                            const p = new Particle(cx, cy, rand(0, Math.PI * 2), rand(0.5, 5), '#ffd700', rand(0.002, 0.006));
-                            p.gravity = 0.03;
-                            p.size = rand(1, 2.5);
-                            particles.push(p);
-                        }
-                        break;
-                    }
-                    // Issue #8: Chinese Knot
-                    case 'chinese_knot': {
-                        const count = 160;
-                        for (let i = 0; i < count; i++) {
-                            const t = (i / count) * Math.PI * 2;
-                            // Diamond/knot parametric shape
-                            const r = 3 * (1 + 0.5 * Math.cos(4 * t));
-                            const kx = r * Math.cos(t);
-                            const ky = r * Math.sin(t);
-                            const angle = Math.atan2(ky, kx);
-                            const speed = Math.hypot(kx, ky) * 0.6;
-                            const p = new Particle(cx, cy, angle, speed, randomFrom(cnyPalette), rand(0.006, 0.012));
-                            particles.push(p);
-                        }
-                        break;
-                    }
-                    // Issue #8: Firecracker chain
-                    case 'firecracker': {
-                        const chainLength = Math.floor(rand(8, 15));
-                        for (let j = 0; j < chainLength; j++) {
-                            setTimeout(() => {
-                                const offsetY = cy + j * 15;
-                                const offsetX = cx + rand(-5, 5);
-                                playFirecrackerSound();
-                                for (let i = 0; i < 8; i++) {
-                                    const angle = rand(0, Math.PI * 2);
-                                    const p = new Particle(offsetX, offsetY, angle, rand(1, 2.5), randomFrom(cnyPalette), rand(0.02, 0.04), rand(1, 2));
-                                    particles.push(p);
-                                }
-                                glowOrbs.push({ x: offsetX, y: offsetY, radius: 3, maxRadius: 30, alpha: 0.6, color: '#ff0000' });
-                            }, j * rand(50, 100));
-                        }
-                        break;
-                    }
-                    // Issue #4: Text blessing firework
-                    case 'text_blessing': {
-                        const text = randomFrom(blessingTexts);
-                        const pixels = getTextPixels(text);
-                        const sampleStep = Math.max(1, Math.floor(pixels.length / 120));
-                        for (let i = 0; i < pixels.length; i += sampleStep) {
-                            const px = pixels[i];
-                            const targetX = cx + px.x;
-                            const targetY = cy + px.y;
-                            const angle = Math.atan2(px.y, px.x);
-                            const speed = Math.hypot(px.x, px.y) * 0.06;
-                            const p = new Particle(cx, cy, angle, speed, randomFrom(cnyPalette), rand(0.003, 0.008), rand(1.5, 2.5));
-                            p.gravity = 0.01;
-                            particles.push(p);
-                        }
-                        break;
-                    }
-                    // Issue #6: Horse-shaped firework (马年)
-                    case 'horse': {
-                        // Galloping horse silhouette using particle bursts
-                        // Body arc
-                        for (let i = 0; i < 40; i++) {
-                            const t = (i / 40) * Math.PI;
-                            const hx = Math.cos(t) * 3;
-                            const hy = Math.sin(t) * -1.5;
-                            const angle = Math.atan2(hy, hx);
-                            const speed = Math.hypot(hx, hy) * 1.2;
-                            particles.push(new Particle(cx, cy, angle, speed, '#ffd700', rand(0.005, 0.01), rand(2, 3)));
-                        }
-                        // Head (upper right burst)
-                        for (let i = 0; i < 20; i++) {
-                            const angle = rand(-Math.PI * 0.8, -Math.PI * 0.2);
-                            const speed = rand(3, 5);
-                            particles.push(new Particle(cx + 20, cy - 10, angle, speed, '#e6b800', rand(0.008, 0.014), rand(1.5, 2.5)));
-                        }
-                        // Legs (downward streaks)
-                        for (let leg = 0; leg < 4; leg++) {
-                            const lx = cx - 15 + leg * 10;
-                            for (let i = 0; i < 8; i++) {
-                                const angle = Math.PI * 0.5 + rand(-0.3, 0.3);
-                                const speed = rand(2, 4);
-                                const p = new Particle(lx, cy + 5, angle, speed, '#cc8800', rand(0.012, 0.02), rand(1, 2));
-                                p.gravity = 0.06;
-                                particles.push(p);
-                            }
-                        }
-                        // Mane & tail (flowing sparks)
-                        for (let i = 0; i < 25; i++) {
-                            const angle = rand(Math.PI * 0.6, Math.PI * 1.2);
-                            const speed = rand(2, 5);
-                            particles.push(new Particle(cx - 15, cy - 5, angle, speed, '#ff6600', rand(0.006, 0.012), rand(1.5, 3)));
-                        }
-                        break;
-                    }
-                }
-            }
-
-            draw() {
-                for (let i = 0; i < this.trail.length; i++) {
-                    const t = this.trail[i];
-                    if (t.alpha <= 0) continue;
-                    ctx.beginPath();
-                    ctx.arc(t.x, t.y, t.size, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(255, 220, 100, ${t.alpha * 0.6})`;
-                    ctx.fill();
-                }
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
-                ctx.fillStyle = '#fff';
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = '#ffd700';
-                ctx.fill();
-                ctx.shadowBlur = 0;
-            }
+        // Rockets
+        for (let i = rockets.length - 1; i >= 0; i--) {
+            rockets[i].update();
+            rockets[i].draw();
+            if (!rockets[i].alive) rockets.splice(i, 1);
         }
 
-        class Particle {
-            constructor(x, y, angle, speed, color, decay, size, gravity) {
-                this.x = x;
-                this.y = y;
-                this.vx = Math.cos(angle) * speed;
-                this.vy = Math.sin(angle) * speed;
-                this.color = color;
-                this.alpha = 1;
-                this.decay = decay || rand(0.008, 0.022);
-                this.size = size || rand(1.5, 3.5);
-                this.gravity = gravity || 0.04;
-                this.alive = true;
-                this.willSplit = false;
-                this.splitTimer = 0;
-                this.friction = 0.985;
-            }
-
-            update() {
-                this.vx *= this.friction;
-                this.vy *= this.friction;
-                this.vy += this.gravity;
-                this.x += this.vx;
-                this.y += this.vy;
-                this.alpha -= this.decay;
-
-                if (this.willSplit) {
-                    this.splitTimer--;
-                    if (this.splitTimer <= 0) {
-                        this.willSplit = false;
-                        for (let i = 0; i < 6; i++) {
-                            particles.push(new Particle(this.x, this.y, rand(0, Math.PI * 2), rand(1, 3), this.color, rand(0.015, 0.03), rand(1, 2)));
-                        }
-                    }
-                }
-
-                if (this.alpha <= 0) this.alive = false;
-            }
-
-            draw() {
-                if (!this.alive) return;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size * this.alpha, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                ctx.globalAlpha = this.alpha;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = this.color;
-                ctx.fill();
-                ctx.shadowBlur = 0;
-                ctx.globalAlpha = 1;
-            }
-        }
-
-        // ========== Auto-launch ==========
-        let lastLaunch = 0;
-        let launchInterval = 500;
-        let burstMode = false;
-        let burstTimer = 0;
-
-        setInterval(() => {
-            burstMode = true;
-            burstTimer = 60;
-        }, 12000);
-
-        // ========== Click/tap ==========
-        canvas.addEventListener('click', (e) => {
-            initAudio();
-            // Check red packet clicks first
-            for (let i = redPackets.length - 1; i >= 0; i--) {
-                if (!redPackets[i].clicked && redPackets[i].hitTest(e.clientX, e.clientY)) {
-                    redPackets[i].onClick();
-                    return;
-                }
-            }
-            const count = Math.floor(rand(3, 6));
-            for (let i = 0; i < count; i++) {
-                const startX = rand(canvas.width * 0.2, canvas.width * 0.8);
-                rockets.push(new Rocket(startX, e.clientX + rand(-80, 80), e.clientY + rand(-50, 50)));
-            }
-        });
-
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            initAudio();
-            for (const touch of e.touches) {
-                // Check red packet clicks
-                let hitPacket = false;
-                for (let i = redPackets.length - 1; i >= 0; i--) {
-                    if (!redPackets[i].clicked && redPackets[i].hitTest(touch.clientX, touch.clientY)) {
-                        redPackets[i].onClick();
-                        hitPacket = true;
-                        break;
-                    }
-                }
-                if (!hitPacket) {
-                    const count = Math.floor(rand(2, 5));
-                    for (let i = 0; i < count; i++) {
-                        const startX = rand(canvas.width * 0.2, canvas.width * 0.8);
-                        rockets.push(new Rocket(startX, touch.clientX + rand(-80, 80), touch.clientY + rand(-50, 50)));
-                    }
-                }
-            }
-        });
-
-        // ========== Issue #9: Countdown System ==========
-        const countdownEl = document.getElementById('countdown');
-        const happyNewYearEl = document.getElementById('happy-new-year');
-        const params = new URLSearchParams(window.location.search);
-        const countdownTarget = params.get('countdown');
-        let countdownActive = false;
-        let countdownFinished = false;
-
-        if (countdownTarget) {
-            const targetDate = new Date(countdownTarget);
-            if (!isNaN(targetDate.getTime())) {
-                countdownActive = true;
-                countdownEl.style.display = 'block';
-
-                function updateCountdown() {
-                    if (countdownFinished) return;
-                    const now = Date.now();
-                    const diff = targetDate.getTime() - now;
-
-                    if (diff <= 0) {
-                        countdownFinished = true;
-                        countdownEl.style.display = 'none';
-                        happyNewYearEl.style.display = 'block';
-                        setTimeout(() => { happyNewYearEl.style.opacity = '1'; }, 50);
-
-                        // Grand Finale
-                        burstMode = true;
-                        burstTimer = 300;
-                        playBellSound();
-                        // Golden flash
-                        glowOrbs.push({ x: canvas.width / 2, y: canvas.height / 2, radius: 10, maxRadius: Math.max(canvas.width, canvas.height), alpha: 0.6, color: '#ffd700' });
-
-                        // Hide after 10s
-                        setTimeout(() => {
-                            happyNewYearEl.style.opacity = '0';
-                            setTimeout(() => { happyNewYearEl.style.display = 'none'; }, 1000);
-                        }, 10000);
-                        return;
-                    }
-
-                    const totalSeconds = Math.ceil(diff / 1000);
-                    const days = Math.floor(totalSeconds / 86400);
-                    const hours = Math.floor((totalSeconds % 86400) / 3600);
-                    const minutes = Math.floor((totalSeconds % 3600) / 60);
-                    const seconds = totalSeconds % 60;
-
-                    if (totalSeconds <= 10) {
-                        countdownEl.classList.add('last-ten');
-                        countdownEl.style.fontSize = `${3 + (10 - totalSeconds) * 0.5}em`;
-                        countdownEl.textContent = totalSeconds;
-                        if (totalSeconds <= 3) playBellSound();
-                    } else if (days > 0) {
-                        countdownEl.textContent = `${days}天 ${hours}时 ${minutes}分 ${seconds}秒`;
-                    } else if (hours > 0) {
-                        countdownEl.textContent = `${hours}时 ${minutes}分 ${seconds}秒`;
-                    } else {
-                        countdownEl.textContent = `${minutes}分 ${seconds}秒`;
-                    }
-
-                    requestAnimationFrame(updateCountdown);
-                }
-                updateCountdown();
-                setInterval(updateCountdown, 200);
-            }
-        }
-
-        // ========== Sky ==========
-        function drawSky() {
-            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, 'rgba(0, 0, 20, 0.2)');
-            gradient.addColorStop(0.5, 'rgba(5, 2, 25, 0.2)');
-            gradient.addColorStop(1, 'rgba(10, 5, 15, 0.2)');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-
-        // ========== Main Animation Loop ==========
-        function animate(timestamp) {
-            drawSky();
-            drawStars();
-            drawLanterns(timestamp);
-
-            // Glow orbs
-            for (let i = glowOrbs.length - 1; i >= 0; i--) {
-                const orb = glowOrbs[i];
-                orb.radius += (orb.maxRadius - orb.radius) * 0.1;
-                orb.alpha *= 0.92;
-                if (orb.alpha < 0.01) { glowOrbs.splice(i, 1); continue; }
-                ctx.globalAlpha = orb.alpha * 0.3;
-                ctx.beginPath();
-                ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
-                ctx.fillStyle = orb.color;
-                ctx.fill();
-                ctx.globalAlpha = 1;
-            }
-
-            // Red packets (Issue #2)
-            redPacketTimer++;
-            if (redPacketTimer >= RED_PACKET_INTERVAL && redPackets.filter(r => !r.clicked).length < 8) {
-                redPacketTimer = 0;
-                redPackets.push(new RedPacket());
-            }
-            for (let i = redPackets.length - 1; i >= 0; i--) {
-                redPackets[i].update();
-                redPackets[i].draw();
-                if (!redPackets[i].alive) redPackets.splice(i, 1);
-            }
-
-            // Horses (Issue #6 - 马年)
-            horseTimer++;
-            if (horseTimer >= HORSE_INTERVAL && horses.length < 2) {
-                horseTimer = 0;
-                horses.push(new Horse());
-            }
-            for (let i = horses.length - 1; i >= 0; i--) {
-                horses[i].update();
-                horses[i].draw();
-                if (!horses[i].alive) horses.splice(i, 1);
-            }
-
-            // Auto-launch rockets
-            if (burstMode) {
-                burstTimer--;
-                if (burstTimer <= 0) burstMode = false;
-                if (timestamp - lastLaunch > 80) {
-                    const count = Math.floor(rand(2, 5));
-                    for (let i = 0; i < count; i++) rockets.push(new Rocket());
-                    lastLaunch = timestamp;
-                }
-            } else if (timestamp - lastLaunch > launchInterval) {
-                const count = Math.floor(rand(1, 3));
-                for (let i = 0; i < count; i++) rockets.push(new Rocket());
-                lastLaunch = timestamp;
-                launchInterval = rand(300, 800);
-            }
-
-            // Rockets
-            for (let i = rockets.length - 1; i >= 0; i--) {
-                rockets[i].update();
-                rockets[i].draw();
-                if (!rockets[i].alive) rockets.splice(i, 1);
-            }
-
-            // Particles
-            for (let i = particles.length - 1; i >= 0; i--) {
-                particles[i].update();
-                particles[i].draw();
-                if (!particles[i].alive) particles.splice(i, 1);
-            }
-
-            requestAnimationFrame(animate);
+        // Particles
+        for (let i = particles.length - 1; i >= 0; i--) {
+            if (!particles[i].update()) { particles.splice(i, 1); continue; }
+            particles[i].draw();
         }
 
         requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
     </script>
 </body>
 </html>
