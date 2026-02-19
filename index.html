@@ -182,12 +182,46 @@
         }
     }
 
+    // ── Text shape sampling (for 文字烟花) ──
+    const textChars = ['福', '马', '吉', '春', '旺', '发'];
+    const textPointsCache = {};
+
+    function sampleTextPoints(char, numPoints) {
+        if (textPointsCache[char]) return textPointsCache[char];
+        const offscreen = document.createElement('canvas');
+        const size = 120;
+        offscreen.width = size;
+        offscreen.height = size;
+        const oc = offscreen.getContext('2d');
+        oc.fillStyle = '#fff';
+        oc.font = `bold ${size * 0.85}px KaiTi, STKaiti, SimSun, serif`;
+        oc.textAlign = 'center';
+        oc.textBaseline = 'middle';
+        oc.fillText(char, size / 2, size / 2);
+        const imageData = oc.getImageData(0, 0, size, size);
+        const points = [];
+        for (let y = 0; y < size; y += 2) {
+            for (let x = 0; x < size; x += 2) {
+                if (imageData.data[(y * size + x) * 4 + 3] > 128) {
+                    points.push({ x: (x - size / 2) / size, y: (y - size / 2) / size });
+                }
+            }
+        }
+        // Subsample to target count
+        const sampled = [];
+        const step = Math.max(1, Math.floor(points.length / numPoints));
+        for (let i = 0; i < points.length; i += step) sampled.push(points[i]);
+        textPointsCache[char] = sampled;
+        return sampled;
+    }
+
     // ── Rockets & Explosions ──
     const rockets = [];
     const flashes = [];
+    let textFireworkCounter = 0;
 
     class Rocket {
-        constructor(sx, tx, ty) {
+        constructor(sx, tx, ty, forceText) {
             this.x = sx || rand(innerWidth * 0.15, innerWidth * 0.85);
             this.y = innerHeight + 5;
             this.tx = tx || this.x + rand(-40, 40);
@@ -199,6 +233,7 @@
             this.palette = pick(palettes);
             this.trail = [];
             this.alive = true;
+            this.forceText = forceText || false;
             playLaunch();
         }
         update() {
@@ -221,6 +256,31 @@
             const cx = this.x, cy = this.y;
             flashes.push({x: cx, y: cy, r: 5, mr: 120, a: 0.35, c: p[0]});
             playBoom();
+
+            // Every 4th firework is a text firework, or forced
+            textFireworkCounter++;
+            const isText = this.forceText || (textFireworkCounter % 4 === 0);
+
+            if (isText) {
+                // ── Text-shaped explosion (文字烟花) ──
+                const char = pick(textChars);
+                const points = sampleTextPoints(char, 180);
+                const spread = rand(100, 160); // size of the text in pixels
+                const color = pick([['#ffd700', '#ffec8b', '#fff'], ['#ff0000', '#ff4444', '#ffd700'], p]);
+                for (const pt of points) {
+                    const tx = cx + pt.x * spread;
+                    const ty = cy + pt.y * spread;
+                    const angle = Math.atan2(ty - cy, tx - cx);
+                    const dist = Math.hypot(tx - cx, ty - cy);
+                    const speed = dist / 18 + rand(0.2, 0.8);
+                    const pp = new Particle(cx, cy, angle, speed, pick(color), rand(0.004, 0.009));
+                    pp.gravity = 0.012;
+                    pp.friction = 0.97;
+                    pp.size = rand(1.8, 3);
+                    particles.push(pp);
+                }
+                return;
+            }
 
             const type = Math.floor(rand(0, 5));
             switch (type) {
@@ -435,6 +495,13 @@
     let lastLaunch = 0, interval = 600;
     let burstMode = false, burstTimer = 0;
     setInterval(() => { burstMode = true; burstTimer = 50; }, 10000);
+
+    // Dedicated text firework burst every 15 seconds
+    setInterval(() => {
+        const tx = rand(innerWidth * 0.25, innerWidth * 0.75);
+        const ty = rand(innerHeight * 0.12, innerHeight * 0.35);
+        rockets.push(new Rocket(rand(innerWidth * 0.3, innerWidth * 0.7), tx, ty, true));
+    }, 15000);
 
     // ── Main loop ──
     function animate(ts) {
