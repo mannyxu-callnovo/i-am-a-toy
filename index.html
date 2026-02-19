@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I Am A Toy - Fireworks Spectacular</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #000; overflow: hidden; cursor: crosshair; }
+        canvas { display: block; }
+        #title {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-family: 'Georgia', serif;
+            font-size: 2.5em;
+            color: rgba(255, 255, 255, 0.08);
+            letter-spacing: 0.3em;
+            pointer-events: none;
+            text-transform: uppercase;
+            z-index: 10;
+        }
+        #hint {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            font-size: 0.85em;
+            color: rgba(255, 255, 255, 0.15);
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div id="title">I Am A Toy</div>
+    <div id="hint">Click or tap anywhere to launch fireworks</div>
+    <canvas id="fireworks"></canvas>
+    <script>
+        const canvas = document.getElementById('fireworks');
+        const ctx = canvas.getContext('2d');
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        const particles = [];
+        const rockets = [];
+        const stars = [];
+        const glowOrbs = [];
+
+        // Vibrant color palettes for different explosion styles
+        const palettes = [
+            ['#ff0040', '#ff355e', '#ff6b6b', '#ffaaaa'],           // Reds
+            ['#ff8c00', '#ffa500', '#ffd700', '#ffec8b'],           // Gold
+            ['#00ff87', '#00e676', '#69f0ae', '#b9f6ca'],           // Greens
+            ['#00bfff', '#1e90ff', '#63b3ed', '#90cdf4'],           // Blues
+            ['#bf00ff', '#9b59b6', '#c084fc', '#e9d5ff'],           // Purples
+            ['#ff1493', '#ff69b4', '#ff9ff3', '#ffc0cb'],           // Pinks
+            ['#00ffff', '#00ced1', '#48dbfb', '#7efff5'],           // Cyans
+            ['#ff4500', '#ff6347', '#ff7f50', '#ffa07a'],           // Oranges
+            ['#fff', '#e0e0e0', '#c0c0c0', '#ffd700'],             // Silver & Gold
+            ['#ff0040', '#ffd700', '#00ff87', '#00bfff', '#bf00ff'] // Rainbow
+        ];
+
+        function randomPalette() {
+            return palettes[Math.floor(Math.random() * palettes.length)];
+        }
+
+        function randomFrom(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function rand(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        // Starfield background
+        function initStars() {
+            for (let i = 0; i < 200; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 1.5,
+                    twinkle: Math.random() * Math.PI * 2,
+                    speed: rand(0.01, 0.03)
+                });
+            }
+        }
+        initStars();
+
+        function drawStars() {
+            stars.forEach(s => {
+                s.twinkle += s.speed;
+                const alpha = 0.3 + Math.sin(s.twinkle) * 0.3;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                ctx.fill();
+            });
+        }
+
+        // Explosion types
+        const EXPLOSION_TYPES = [
+            'spherical',
+            'ring',
+            'chrysanthemum',
+            'willow',
+            'palm',
+            'heart',
+            'spiral',
+            'double_ring',
+            'crossette',
+            'kamuro'
+        ];
+
+        class Rocket {
+            constructor(startX, targetX, targetY) {
+                this.x = startX || rand(canvas.width * 0.1, canvas.width * 0.9);
+                this.y = canvas.height + 10;
+                this.targetX = targetX || this.x + rand(-50, 50);
+                this.targetY = targetY || rand(canvas.height * 0.08, canvas.height * 0.42);
+                this.speed = rand(5, 8);
+                this.angle = Math.atan2(this.targetY - this.y, this.targetX - this.x);
+                this.vx = Math.cos(this.angle) * this.speed;
+                this.vy = Math.sin(this.angle) * this.speed;
+                this.palette = randomPalette();
+                this.trail = [];
+                this.alive = true;
+                this.sparkTimer = 0;
+            }
+
+            update() {
+                this.trail.push({ x: this.x, y: this.y, alpha: 1, size: rand(1, 2.5) });
+                if (this.trail.length > 18) this.trail.shift();
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Emit small sparks from the rocket
+                this.sparkTimer++;
+                if (this.sparkTimer % 2 === 0) {
+                    particles.push(new Particle(
+                        this.x + rand(-2, 2),
+                        this.y,
+                        rand(0, Math.PI * 2),
+                        rand(0.2, 0.8),
+                        '#ffd700',
+                        0.06,
+                        rand(0.5, 1.5),
+                        0.02
+                    ));
+                }
+
+                const dist = Math.hypot(this.targetX - this.x, this.targetY - this.y);
+                if (dist < 10 || this.y <= this.targetY) {
+                    this.alive = false;
+                    this.explode();
+                }
+
+                this.trail.forEach(t => t.alpha -= 0.06);
+            }
+
+            explode() {
+                const type = randomFrom(EXPLOSION_TYPES);
+                const palette = this.palette;
+                const cx = this.x, cy = this.y;
+
+                // Screen flash
+                glowOrbs.push({ x: cx, y: cy, radius: 5, maxRadius: 150, alpha: 0.4, color: palette[0] });
+
+                switch (type) {
+                    case 'spherical': {
+                        const count = Math.floor(rand(80, 150));
+                        for (let i = 0; i < count; i++) {
+                            const angle = (Math.PI * 2 / count) * i + rand(-0.1, 0.1);
+                            const speed = rand(1.5, 5.5);
+                            particles.push(new Particle(cx, cy, angle, speed, randomFrom(palette)));
+                        }
+                        break;
+                    }
+                    case 'ring': {
+                        const count = 80;
+                        for (let i = 0; i < count; i++) {
+                            const angle = (Math.PI * 2 / count) * i;
+                            particles.push(new Particle(cx, cy, angle, rand(3.5, 4.5), randomFrom(palette)));
+                        }
+                        break;
+                    }
+                    case 'chrysanthemum': {
+                        const count = 200;
+                        for (let i = 0; i < count; i++) {
+                            const angle = (Math.PI * 2 / count) * i;
+                            const speed = rand(1, 6);
+                            const p = new Particle(cx, cy, angle, speed, randomFrom(palette), rand(0.004, 0.012));
+                            p.gravity = 0.02;
+                            particles.push(p);
+                        }
+                        break;
+                    }
+                    case 'willow': {
+                        const count = 150;
+                        for (let i = 0; i < count; i++) {
+                            const angle = (Math.PI * 2 / count) * i + rand(-0.15, 0.15);
+                            const speed = rand(2, 5);
+                            const p = new Particle(cx, cy, angle, speed, '#ffd700', rand(0.003, 0.008));
+                            p.gravity = 0.06;
+                            p.size = rand(1, 2);
+                            particles.push(p);
+                        }
+                        break;
+                    }
+                    case 'palm': {
+                        const branches = Math.floor(rand(5, 9));
+                        for (let b = 0; b < branches; b++) {
+                            const branchAngle = (Math.PI * 2 / branches) * b;
+                            for (let i = 0; i < 25; i++) {
+                                const speed = rand(2, 6);
+                                const angle = branchAngle + rand(-0.15, 0.15);
+                                const p = new Particle(cx, cy, angle, speed, randomFrom(palette));
+                                p.gravity = 0.05;
+                                particles.push(p);
+                            }
+                        }
+                        break;
+                    }
+                    case 'heart': {
+                        const count = 120;
+                        for (let i = 0; i < count; i++) {
+                            const t = (i / count) * Math.PI * 2;
+                            // Heart parametric equations
+                            const hx = 16 * Math.pow(Math.sin(t), 3);
+                            const hy = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                            const angle = Math.atan2(hy, hx);
+                            const speed = Math.hypot(hx, hy) * 0.2;
+                            const p = new Particle(cx, cy, angle, speed, randomFrom(palette), rand(0.006, 0.014));
+                            particles.push(p);
+                        }
+                        break;
+                    }
+                    case 'spiral': {
+                        const arms = Math.floor(rand(2, 5));
+                        for (let a = 0; a < arms; a++) {
+                            const baseAngle = (Math.PI * 2 / arms) * a;
+                            for (let i = 0; i < 40; i++) {
+                                const angle = baseAngle + (i * 0.15);
+                                const speed = 1 + i * 0.1;
+                                const p = new Particle(cx, cy, angle, speed, randomFrom(palette), rand(0.008, 0.015));
+                                particles.push(p);
+                            }
+                        }
+                        break;
+                    }
+                    case 'double_ring': {
+                        for (let ring = 0; ring < 2; ring++) {
+                            const count = 60;
+                            const speed = ring === 0 ? rand(2.5, 3.5) : rand(4, 5.5);
+                            const color = ring === 0 ? palette[0] : palette[palette.length - 1];
+                            for (let i = 0; i < count; i++) {
+                                const angle = (Math.PI * 2 / count) * i;
+                                particles.push(new Particle(cx, cy, angle, speed, color));
+                            }
+                        }
+                        break;
+                    }
+                    case 'crossette': {
+                        const count = 30;
+                        for (let i = 0; i < count; i++) {
+                            const angle = (Math.PI * 2 / count) * i;
+                            const speed = rand(3, 5);
+                            const p = new Particle(cx, cy, angle, speed, randomFrom(palette), 0.015);
+                            p.willSplit = true;
+                            p.splitTimer = Math.floor(rand(15, 30));
+                            particles.push(p);
+                        }
+                        break;
+                    }
+                    case 'kamuro': {
+                        const count = 250;
+                        for (let i = 0; i < count; i++) {
+                            const angle = rand(0, Math.PI * 2);
+                            const speed = rand(0.5, 5);
+                            const p = new Particle(cx, cy, angle, speed, '#ffd700', rand(0.002, 0.006));
+                            p.gravity = 0.03;
+                            p.size = rand(1, 2.5);
+                            particles.push(p);
+                        }
+                        break;
+                    }
+                }
+            }
+
+            draw() {
+                // Trail glow
+                for (let i = 0; i < this.trail.length; i++) {
+                    const t = this.trail[i];
+                    if (t.alpha <= 0) continue;
+                    ctx.beginPath();
+                    ctx.arc(t.x, t.y, t.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 220, 100, ${t.alpha * 0.6})`;
+                    ctx.fill();
+                }
+
+                // Rocket head
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = '#fff';
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#ffd700';
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        class Particle {
+            constructor(x, y, angle, speed, color, decay, size, gravity) {
+                this.x = x;
+                this.y = y;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.color = color;
+                this.alpha = 1;
+                this.decay = decay || rand(0.008, 0.022);
+                this.size = size || rand(1.5, 3.5);
+                this.gravity = gravity || 0.04;
+                this.alive = true;
+                this.willSplit = false;
+                this.splitTimer = 0;
+                this.friction = 0.985;
+            }
+
+            update() {
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+                this.vy += this.gravity;
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= this.decay;
+
+                // Crossette split effect
+                if (this.willSplit) {
+                    this.splitTimer--;
+                    if (this.splitTimer <= 0) {
+                        this.willSplit = false;
+                        for (let i = 0; i < 6; i++) {
+                            const angle = rand(0, Math.PI * 2);
+                            const speed = rand(1, 3);
+                            particles.push(new Particle(this.x, this.y, angle, speed, this.color, rand(0.015, 0.03), rand(1, 2)));
+                        }
+                    }
+                }
+
+                if (this.alpha <= 0) this.alive = false;
+            }
+
+            draw() {
+                if (!this.alive) return;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * this.alpha, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.alpha;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        // Auto-launch timing
+        let lastLaunch = 0;
+        let launchInterval = 500;
+        let burstMode = false;
+        let burstTimer = 0;
+
+        // Periodically do a grand finale burst
+        setInterval(() => {
+            burstMode = true;
+            burstTimer = 60; // frames of rapid fire
+        }, 12000);
+
+        // Click/tap to launch
+        canvas.addEventListener('click', (e) => {
+            const count = Math.floor(rand(3, 6));
+            for (let i = 0; i < count; i++) {
+                const startX = rand(canvas.width * 0.2, canvas.width * 0.8);
+                rockets.push(new Rocket(startX, e.clientX + rand(-80, 80), e.clientY + rand(-50, 50)));
+            }
+        });
+
+        // Touch support
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            for (const touch of e.touches) {
+                const count = Math.floor(rand(2, 5));
+                for (let i = 0; i < count; i++) {
+                    const startX = rand(canvas.width * 0.2, canvas.width * 0.8);
+                    rockets.push(new Rocket(startX, touch.clientX + rand(-80, 80), touch.clientY + rand(-50, 50)));
+                }
+            }
+        });
+
+        // Gradient sky
+        function drawSky() {
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, 'rgba(0, 0, 20, 0.2)');
+            gradient.addColorStop(0.5, 'rgba(5, 2, 25, 0.2)');
+            gradient.addColorStop(1, 'rgba(10, 5, 15, 0.2)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function animate(timestamp) {
+            drawSky();
+            drawStars();
+
+            // Update and draw glow orbs (flash effects)
+            for (let i = glowOrbs.length - 1; i >= 0; i--) {
+                const orb = glowOrbs[i];
+                orb.radius += (orb.maxRadius - orb.radius) * 0.1;
+                orb.alpha *= 0.92;
+                if (orb.alpha < 0.01) {
+                    glowOrbs.splice(i, 1);
+                    continue;
+                }
+                const grad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius);
+                grad.addColorStop(0, orb.color.replace(')', `, ${orb.alpha})`).replace('rgb', 'rgba').replace('#', ''));
+                grad.addColorStop(1, 'transparent');
+                // Simpler approach for hex colors
+                ctx.globalAlpha = orb.alpha * 0.3;
+                ctx.beginPath();
+                ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
+                ctx.fillStyle = orb.color;
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+
+            // Auto-launch rockets
+            if (burstMode) {
+                burstTimer--;
+                if (burstTimer <= 0) burstMode = false;
+                if (timestamp - lastLaunch > 80) {
+                    const count = Math.floor(rand(2, 5));
+                    for (let i = 0; i < count; i++) {
+                        rockets.push(new Rocket());
+                    }
+                    lastLaunch = timestamp;
+                }
+            } else if (timestamp - lastLaunch > launchInterval) {
+                const count = Math.floor(rand(1, 3));
+                for (let i = 0; i < count; i++) {
+                    rockets.push(new Rocket());
+                }
+                lastLaunch = timestamp;
+                launchInterval = rand(300, 800);
+            }
+
+            // Update and draw rockets
+            for (let i = rockets.length - 1; i >= 0; i--) {
+                rockets[i].update();
+                rockets[i].draw();
+                if (!rockets[i].alive) rockets.splice(i, 1);
+            }
+
+            // Update and draw particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].draw();
+                if (!particles[i].alive) particles.splice(i, 1);
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>

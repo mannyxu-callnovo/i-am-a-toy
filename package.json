@@ -1,0 +1,8 @@
+{
+  "name": "i-am-a-toy",
+  "version": "1.0.0",
+  "description": "Endless fireworks single-page webapp",
+  "scripts": {
+    "start": "npx serve ."
+  }
+}
