@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I Am A Toy - Fireworks Spectacular</title>
+    <title>I Am A Toy - Spring Festival Fireworks</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #000; overflow: hidden; cursor: crosshair; }
+        body { background: #000; overflow: hidden; cursor: crosshair; font-family: 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif; }
         canvas { display: block; }
         #title {
             position: fixed;
@@ -28,18 +28,173 @@
             left: 0;
             right: 0;
             text-align: center;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
             font-size: 0.85em;
             color: rgba(255, 255, 255, 0.15);
             pointer-events: none;
             z-index: 10;
+        }
+
+        /* Issue #7: Spring couplets */
+        .couplet {
+            position: fixed;
+            writing-mode: vertical-rl;
+            font-family: 'KaiTi', 'STKaiti', 'Microsoft YaHei', serif;
+            font-size: 1.8em;
+            color: #ffd700;
+            background: linear-gradient(180deg, #cc0000 0%, #990000 100%);
+            padding: 18px 12px;
+            border: 2px solid #ffd700;
+            border-radius: 6px;
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0.55;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            letter-spacing: 0.15em;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.1);
+        }
+        .couplet-left { left: 15px; top: 50%; transform: translateY(-50%); }
+        .couplet-right { right: 15px; top: 50%; transform: translateY(-50%); }
+        #横批 {
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'KaiTi', 'STKaiti', 'Microsoft YaHei', serif;
+            font-size: 2em;
+            color: #ffd700;
+            background: linear-gradient(90deg, #cc0000, #990000);
+            padding: 10px 30px;
+            border: 2px solid #ffd700;
+            border-radius: 6px;
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0.55;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            letter-spacing: 0.3em;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+        }
+        #fu-char {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(180deg);
+            font-family: 'KaiTi', 'STKaiti', 'Microsoft YaHei', serif;
+            font-size: 5em;
+            color: #ffd700;
+            background: #cc0000;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #ffd700;
+            border-radius: 8px;
+            z-index: 5;
+            pointer-events: none;
+            opacity: 0.15;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+            transform-origin: center center;
+        }
+
+        /* Issue #5: Sound toggle */
+        #sound-toggle {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            z-index: 20;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.4em;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        #sound-toggle:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+        /* Issue #9: Countdown */
+        #countdown {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Georgia', 'KaiTi', serif;
+            font-size: 3em;
+            color: rgba(255, 215, 0, 0.7);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            z-index: 15;
+            pointer-events: none;
+            text-align: center;
+            white-space: nowrap;
+            display: none;
+        }
+        #countdown.last-ten {
+            animation: pulse 1s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+        }
+        #happy-new-year {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'KaiTi', 'STKaiti', 'Microsoft YaHei', serif;
+            font-size: 4em;
+            color: #ffd700;
+            text-shadow: 0 0 30px rgba(255, 0, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.5);
+            z-index: 15;
+            pointer-events: none;
+            text-align: center;
+            display: none;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .couplet { font-size: 1.2em; padding: 12px 8px; }
+            .couplet-left { left: 5px; }
+            .couplet-right { right: 5px; }
+            #横批 { font-size: 1.3em; padding: 8px 20px; top: 55px; }
+            #fu-char { font-size: 3em; width: 70px; height: 70px; }
+            #title { font-size: 1.5em; }
+            #countdown { font-size: 2em; }
+            #happy-new-year { font-size: 2.5em; }
+        }
+        @media (max-width: 480px) {
+            .couplet { display: none; }
+            #横批 { font-size: 1em; }
+            #fu-char { font-size: 2.5em; width: 55px; height: 55px; }
         }
     </style>
 </head>
 <body>
     <div id="title">I Am A Toy</div>
     <div id="hint">Click or tap anywhere to launch fireworks</div>
+
+    <!-- Issue #7: Couplets and Fu -->
+    <div class="couplet couplet-left">金蛇狂舞迎新岁</div>
+    <div class="couplet couplet-right">紫燕高飞报早春</div>
+    <div id="横批">蛇年大吉</div>
+    <div id="fu-char">福</div>
+
+    <!-- Issue #5: Sound toggle -->
+    <button id="sound-toggle" title="Toggle sound">🔇</button>
+
+    <!-- Issue #9: Countdown -->
+    <div id="countdown"></div>
+    <div id="happy-new-year">🎊 新年快乐 🎊<br><span style="font-size:0.5em">蛇年大吉 · 恭喜发财</span></div>
+
     <canvas id="fireworks"></canvas>
+
     <script>
         const canvas = document.getElementById('fireworks');
         const ctx = canvas.getContext('2d');
@@ -55,34 +210,130 @@
         const rockets = [];
         const stars = [];
         const glowOrbs = [];
+        const redPackets = [];
+        const lanterns = [];
+        const snakes = [];
 
-        // Vibrant color palettes for different explosion styles
+        // ========== Issue #5: Sound System ==========
+        let audioCtx = null;
+        let soundEnabled = localStorage.getItem('i-am-a-toy-sound') === 'true';
+        const soundToggle = document.getElementById('sound-toggle');
+        soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playLaunchSound() {
+            if (!soundEnabled || !audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.35);
+        }
+
+        function playExplosionSound(size) {
+            if (!soundEnabled || !audioCtx) return;
+            const bufferSize = audioCtx.sampleRate * 0.3;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.15));
+            }
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 400 + (size || 1) * 200;
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+            source.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            source.start();
+        }
+
+        function playFirecrackerSound() {
+            if (!soundEnabled || !audioCtx) return;
+            const bufferSize = audioCtx.sampleRate * 0.08;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.05));
+            }
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            source.connect(gain);
+            gain.connect(audioCtx.destination);
+            source.start();
+        }
+
+        function playBellSound() {
+            if (!soundEnabled || !audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = 220;
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 3);
+            // Overtone
+            const osc2 = audioCtx.createOscillator();
+            const gain2 = audioCtx.createGain();
+            osc2.type = 'sine';
+            osc2.frequency.value = 440;
+            gain2.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2);
+            osc2.connect(gain2);
+            gain2.connect(audioCtx.destination);
+            osc2.start();
+            osc2.stop(audioCtx.currentTime + 2);
+        }
+
+        soundToggle.addEventListener('click', () => {
+            initAudio();
+            soundEnabled = !soundEnabled;
+            localStorage.setItem('i-am-a-toy-sound', soundEnabled);
+            soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+        });
+
+        // ========== Color Palettes ==========
         const palettes = [
-            ['#ff0040', '#ff355e', '#ff6b6b', '#ffaaaa'],           // Reds
-            ['#ff8c00', '#ffa500', '#ffd700', '#ffec8b'],           // Gold
-            ['#00ff87', '#00e676', '#69f0ae', '#b9f6ca'],           // Greens
-            ['#00bfff', '#1e90ff', '#63b3ed', '#90cdf4'],           // Blues
-            ['#bf00ff', '#9b59b6', '#c084fc', '#e9d5ff'],           // Purples
-            ['#ff1493', '#ff69b4', '#ff9ff3', '#ffc0cb'],           // Pinks
-            ['#00ffff', '#00ced1', '#48dbfb', '#7efff5'],           // Cyans
-            ['#ff4500', '#ff6347', '#ff7f50', '#ffa07a'],           // Oranges
-            ['#fff', '#e0e0e0', '#c0c0c0', '#ffd700'],             // Silver & Gold
-            ['#ff0040', '#ffd700', '#00ff87', '#00bfff', '#bf00ff'] // Rainbow
+            ['#ff0040', '#ff355e', '#ff6b6b', '#ffaaaa'],
+            ['#ff8c00', '#ffa500', '#ffd700', '#ffec8b'],
+            ['#00ff87', '#00e676', '#69f0ae', '#b9f6ca'],
+            ['#00bfff', '#1e90ff', '#63b3ed', '#90cdf4'],
+            ['#bf00ff', '#9b59b6', '#c084fc', '#e9d5ff'],
+            ['#ff1493', '#ff69b4', '#ff9ff3', '#ffc0cb'],
+            ['#00ffff', '#00ced1', '#48dbfb', '#7efff5'],
+            ['#ff4500', '#ff6347', '#ff7f50', '#ffa07a'],
+            ['#fff', '#e0e0e0', '#c0c0c0', '#ffd700'],
+            ['#ff0040', '#ffd700', '#00ff87', '#00bfff', '#bf00ff'],
+            // Issue #8: Spring Festival palette
+            ['#ff0000', '#cc0000', '#ffd700', '#ff6600']
         ];
 
-        function randomPalette() {
-            return palettes[Math.floor(Math.random() * palettes.length)];
-        }
+        function randomPalette() { return palettes[Math.floor(Math.random() * palettes.length)]; }
+        function randomFrom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        function rand(min, max) { return Math.random() * (max - min) + min; }
 
-        function randomFrom(arr) {
-            return arr[Math.floor(Math.random() * arr.length)];
-        }
-
-        function rand(min, max) {
-            return Math.random() * (max - min) + min;
-        }
-
-        // Starfield background
+        // ========== Starfield ==========
         function initStars() {
             for (let i = 0; i < 200; i++) {
                 stars.push({
@@ -107,19 +358,330 @@
             });
         }
 
-        // Explosion types
+        // ========== Issue #3: Lanterns ==========
+        function initLanterns() {
+            const chars = ['福', '春', '喜', '乐', '财', '旺'];
+            const positions = [
+                { x: 0.06, y: 0.2 }, { x: 0.08, y: 0.38 },
+                { x: 0.94, y: 0.2 }, { x: 0.92, y: 0.38 },
+                { x: 0.12, y: 0.15 }, { x: 0.88, y: 0.15 }
+            ];
+            positions.forEach((pos, i) => {
+                lanterns.push({
+                    x: pos.x * canvas.width,
+                    y: pos.y * canvas.height,
+                    size: rand(25, 40),
+                    char: chars[i % chars.length],
+                    swingOffset: Math.random() * Math.PI * 2,
+                    swingSpeed: rand(0.008, 0.015)
+                });
+            });
+        }
+        initLanterns();
+
+        function drawLanterns(timestamp) {
+            lanterns.forEach(l => {
+                const swing = Math.sin((timestamp || 0) * 0.001 + l.swingOffset) * 8;
+                const cx = l.x + swing;
+                const cy = l.y;
+                const s = l.size;
+
+                ctx.save();
+                ctx.globalAlpha = 0.6;
+
+                // Glow
+                const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, s * 2.5);
+                glow.addColorStop(0, 'rgba(255, 50, 0, 0.15)');
+                glow.addColorStop(1, 'rgba(255, 50, 0, 0)');
+                ctx.fillStyle = glow;
+                ctx.fillRect(cx - s * 2.5, cy - s * 2.5, s * 5, s * 5);
+
+                // String
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - s * 1.2);
+                ctx.lineTo(cx, cy - s * 0.7);
+                ctx.stroke();
+
+                // Body
+                ctx.beginPath();
+                ctx.ellipse(cx, cy, s * 0.6, s, 0, 0, Math.PI * 2);
+                const bodyGrad = ctx.createRadialGradient(cx - s * 0.15, cy - s * 0.2, 0, cx, cy, s);
+                bodyGrad.addColorStop(0, '#ff3333');
+                bodyGrad.addColorStop(1, '#cc0000');
+                ctx.fillStyle = bodyGrad;
+                ctx.fill();
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                // Ribs
+                ctx.strokeStyle = 'rgba(255, 215, 0, 0.4)';
+                ctx.lineWidth = 0.8;
+                for (let i = -2; i <= 2; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(cx - s * 0.55, cy + i * s * 0.25);
+                    ctx.quadraticCurveTo(cx, cy + i * s * 0.25 - 3, cx + s * 0.55, cy + i * s * 0.25);
+                    ctx.stroke();
+                }
+
+                // Character
+                ctx.font = `bold ${s * 0.7}px KaiTi, STKaiti, serif`;
+                ctx.fillStyle = '#ffd700';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(l.char, cx, cy);
+
+                // Top cap
+                ctx.fillStyle = '#ffd700';
+                ctx.fillRect(cx - s * 0.3, cy - s * 0.72, s * 0.6, s * 0.08);
+
+                // Bottom cap
+                ctx.fillRect(cx - s * 0.3, cy + s * 0.65, s * 0.6, s * 0.08);
+
+                // Tassel
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 1.5;
+                const tasselTop = cy + s * 0.73;
+                ctx.beginPath();
+                ctx.moveTo(cx, tasselTop);
+                ctx.lineTo(cx, tasselTop + s * 0.4);
+                ctx.stroke();
+                for (let i = -1; i <= 1; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(cx, tasselTop + s * 0.4);
+                    ctx.quadraticCurveTo(cx + i * s * 0.15, tasselTop + s * 0.55, cx + i * s * 0.1, tasselTop + s * 0.65);
+                    ctx.stroke();
+                }
+
+                ctx.restore();
+            });
+        }
+
+        // ========== Issue #2: Red Packets ==========
+        class RedPacket {
+            constructor() {
+                this.x = rand(50, canvas.width - 50);
+                this.y = -60;
+                this.width = rand(30, 50);
+                this.height = this.width * 1.5;
+                this.vy = rand(1.5, 3.5);
+                this.vx = rand(-0.3, 0.3);
+                this.swingPhase = Math.random() * Math.PI * 2;
+                this.swingSpeed = rand(0.02, 0.04);
+                this.rotation = rand(-0.15, 0.15);
+                this.alive = true;
+                this.alpha = 1;
+                this.blessings = ['福', '财', '喜', '旺', '吉'];
+                this.char = randomFrom(this.blessings);
+                this.clicked = false;
+                this.clickMessage = '';
+                this.clickAlpha = 0;
+                this.clickY = 0;
+            }
+
+            update() {
+                if (this.clicked) {
+                    this.clickAlpha -= 0.015;
+                    this.clickY -= 1;
+                    if (this.clickAlpha <= 0) this.alive = false;
+                    return;
+                }
+                this.y += this.vy;
+                this.x += Math.sin(this.swingPhase) * 0.5 + this.vx;
+                this.swingPhase += this.swingSpeed;
+                if (this.y > canvas.height + 80) this.alive = false;
+            }
+
+            draw() {
+                if (this.clicked) {
+                    ctx.save();
+                    ctx.globalAlpha = this.clickAlpha;
+                    ctx.font = 'bold 20px Microsoft YaHei, PingFang SC, sans-serif';
+                    ctx.fillStyle = '#ffd700';
+                    ctx.textAlign = 'center';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#ff0000';
+                    ctx.fillText(this.clickMessage, this.x, this.clickY);
+                    ctx.shadowBlur = 0;
+                    ctx.restore();
+                    return;
+                }
+
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation + Math.sin(this.swingPhase) * 0.05);
+
+                const w = this.width, h = this.height;
+                const r = 4;
+
+                // Shadow
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = 'rgba(255, 0, 0, 0.4)';
+
+                // Body
+                ctx.beginPath();
+                ctx.roundRect(-w/2, -h/2, w, h, r);
+                const grad = ctx.createLinearGradient(-w/2, -h/2, w/2, h/2);
+                grad.addColorStop(0, '#ee0000');
+                grad.addColorStop(1, '#cc0000');
+                ctx.fillStyle = grad;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // Gold trim
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                // Gold circle
+                ctx.beginPath();
+                ctx.arc(0, -h * 0.05, w * 0.25, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
+                ctx.fill();
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                // Character
+                ctx.font = `bold ${w * 0.45}px KaiTi, STKaiti, serif`;
+                ctx.fillStyle = '#ffd700';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.char, 0, -h * 0.05);
+
+                ctx.restore();
+            }
+
+            hitTest(mx, my) {
+                return Math.abs(mx - this.x) < this.width / 2 && Math.abs(my - this.y) < this.height / 2;
+            }
+
+            onClick() {
+                const messages = ['恭喜发财', '万事如意', '蛇年大吉', '新年快乐', '阖家幸福', '财源广进'];
+                this.clicked = true;
+                this.clickMessage = randomFrom(messages);
+                this.clickAlpha = 1.5;
+                this.clickY = this.y;
+                // Spawn mini explosion
+                for (let i = 0; i < 15; i++) {
+                    const angle = rand(0, Math.PI * 2);
+                    const speed = rand(1, 3);
+                    particles.push(new Particle(this.x, this.y, angle, speed, randomFrom(['#ffd700', '#ff0000', '#ff6600']), 0.025, rand(1, 2.5)));
+                }
+            }
+        }
+
+        let redPacketTimer = 0;
+        const RED_PACKET_INTERVAL = 400;
+
+        // ========== Issue #6: Snake Class ==========
+        class Snake {
+            constructor() {
+                this.segments = [];
+                const startX = Math.random() < 0.5 ? -20 : canvas.width + 20;
+                const startY = rand(canvas.height * 0.1, canvas.height * 0.5);
+                this.direction = startX < 0 ? 1 : -1;
+                this.speed = rand(2, 3.5);
+                this.amplitude = rand(30, 60);
+                this.frequency = rand(0.03, 0.06);
+                this.phase = 0;
+                this.segmentCount = 30;
+                this.alive = true;
+                this.baseY = startY;
+
+                for (let i = 0; i < this.segmentCount; i++) {
+                    this.segments.push({ x: startX - i * 8 * this.direction, y: startY });
+                }
+            }
+
+            update() {
+                this.phase += this.frequency;
+                const head = this.segments[0];
+                head.x += this.speed * this.direction;
+                head.y = this.baseY + Math.sin(this.phase) * this.amplitude;
+
+                for (let i = 1; i < this.segments.length; i++) {
+                    const prev = this.segments[i - 1];
+                    const seg = this.segments[i];
+                    const dx = prev.x - seg.x;
+                    const dy = prev.y - seg.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist > 8) {
+                        seg.x += (dx / dist) * (dist - 8);
+                        seg.y += (dy / dist) * (dist - 8);
+                    }
+                }
+
+                if ((this.direction > 0 && head.x > canvas.width + 50) ||
+                    (this.direction < 0 && head.x < -50)) {
+                    this.alive = false;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                for (let i = this.segments.length - 1; i >= 0; i--) {
+                    const seg = this.segments[i];
+                    const t = 1 - i / this.segments.length;
+                    const size = 2 + t * 4;
+                    const alpha = 0.3 + t * 0.7;
+
+                    ctx.beginPath();
+                    ctx.arc(seg.x, seg.y, size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = '#ffd700';
+                    ctx.fill();
+                }
+                // Eyes on head
+                const head = this.segments[0];
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#ff0000';
+                ctx.beginPath();
+                ctx.arc(head.x + this.direction * 3, head.y - 3, 1.5, 0, Math.PI * 2);
+                ctx.arc(head.x + this.direction * 3, head.y + 3, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        let snakeTimer = 0;
+        const SNAKE_INTERVAL = 600;
+
+        // ========== Explosion Types ==========
         const EXPLOSION_TYPES = [
-            'spherical',
-            'ring',
-            'chrysanthemum',
-            'willow',
-            'palm',
-            'heart',
-            'spiral',
-            'double_ring',
-            'crossette',
-            'kamuro'
+            'spherical', 'ring', 'chrysanthemum', 'willow', 'palm',
+            'heart', 'spiral', 'double_ring', 'crossette', 'kamuro',
+            'chinese_knot', 'firecracker', 'text_blessing', 'snake'
         ];
+
+        // Issue #4: Text blessing helpers
+        const blessingTexts = ['新年快乐', '恭喜发财', '蛇年大吉', '万事如意', '阖家幸福'];
+        const offscreenCanvas = document.createElement('canvas');
+        const offscreenCtx = offscreenCanvas.getContext('2d');
+        offscreenCanvas.width = 200;
+        offscreenCanvas.height = 60;
+
+        function getTextPixels(text) {
+            offscreenCtx.clearRect(0, 0, 200, 60);
+            offscreenCtx.font = 'bold 32px Microsoft YaHei, PingFang SC, sans-serif';
+            offscreenCtx.fillStyle = '#fff';
+            offscreenCtx.textAlign = 'center';
+            offscreenCtx.textBaseline = 'middle';
+            offscreenCtx.fillText(text, 100, 30);
+            const imageData = offscreenCtx.getImageData(0, 0, 200, 60);
+            const points = [];
+            for (let y = 0; y < 60; y += 2) {
+                for (let x = 0; x < 200; x += 2) {
+                    if (imageData.data[(y * 200 + x) * 4 + 3] > 128) {
+                        points.push({ x: (x - 100) * 1.2, y: (y - 30) * 1.2 });
+                    }
+                }
+            }
+            return points;
+        }
 
         class Rocket {
             constructor(startX, targetX, targetY) {
@@ -135,27 +697,26 @@
                 this.trail = [];
                 this.alive = true;
                 this.sparkTimer = 0;
+                this.launched = false;
             }
 
             update() {
+                if (!this.launched) {
+                    this.launched = true;
+                    playLaunchSound();
+                }
                 this.trail.push({ x: this.x, y: this.y, alpha: 1, size: rand(1, 2.5) });
                 if (this.trail.length > 18) this.trail.shift();
 
                 this.x += this.vx;
                 this.y += this.vy;
 
-                // Emit small sparks from the rocket
                 this.sparkTimer++;
                 if (this.sparkTimer % 2 === 0) {
                     particles.push(new Particle(
-                        this.x + rand(-2, 2),
-                        this.y,
-                        rand(0, Math.PI * 2),
-                        rand(0.2, 0.8),
-                        '#ffd700',
-                        0.06,
-                        rand(0.5, 1.5),
-                        0.02
+                        this.x + rand(-2, 2), this.y,
+                        rand(0, Math.PI * 2), rand(0.2, 0.8),
+                        '#ffd700', 0.06, rand(0.5, 1.5), 0.02
                     ));
                 }
 
@@ -164,7 +725,6 @@
                     this.alive = false;
                     this.explode();
                 }
-
                 this.trail.forEach(t => t.alpha -= 0.06);
             }
 
@@ -172,17 +732,17 @@
                 const type = randomFrom(EXPLOSION_TYPES);
                 const palette = this.palette;
                 const cx = this.x, cy = this.y;
+                const cnyPalette = ['#ff0000', '#cc0000', '#ffd700', '#ff6600'];
 
-                // Screen flash
                 glowOrbs.push({ x: cx, y: cy, radius: 5, maxRadius: 150, alpha: 0.4, color: palette[0] });
+                playExplosionSound(2);
 
                 switch (type) {
                     case 'spherical': {
                         const count = Math.floor(rand(80, 150));
                         for (let i = 0; i < count; i++) {
                             const angle = (Math.PI * 2 / count) * i + rand(-0.1, 0.1);
-                            const speed = rand(1.5, 5.5);
-                            particles.push(new Particle(cx, cy, angle, speed, randomFrom(palette)));
+                            particles.push(new Particle(cx, cy, angle, rand(1.5, 5.5), randomFrom(palette)));
                         }
                         break;
                     }
@@ -198,8 +758,7 @@
                         const count = 200;
                         for (let i = 0; i < count; i++) {
                             const angle = (Math.PI * 2 / count) * i;
-                            const speed = rand(1, 6);
-                            const p = new Particle(cx, cy, angle, speed, randomFrom(palette), rand(0.004, 0.012));
+                            const p = new Particle(cx, cy, angle, rand(1, 6), randomFrom(palette), rand(0.004, 0.012));
                             p.gravity = 0.02;
                             particles.push(p);
                         }
@@ -209,8 +768,7 @@
                         const count = 150;
                         for (let i = 0; i < count; i++) {
                             const angle = (Math.PI * 2 / count) * i + rand(-0.15, 0.15);
-                            const speed = rand(2, 5);
-                            const p = new Particle(cx, cy, angle, speed, '#ffd700', rand(0.003, 0.008));
+                            const p = new Particle(cx, cy, angle, rand(2, 5), '#ffd700', rand(0.003, 0.008));
                             p.gravity = 0.06;
                             p.size = rand(1, 2);
                             particles.push(p);
@@ -222,9 +780,7 @@
                         for (let b = 0; b < branches; b++) {
                             const branchAngle = (Math.PI * 2 / branches) * b;
                             for (let i = 0; i < 25; i++) {
-                                const speed = rand(2, 6);
-                                const angle = branchAngle + rand(-0.15, 0.15);
-                                const p = new Particle(cx, cy, angle, speed, randomFrom(palette));
+                                const p = new Particle(cx, cy, branchAngle + rand(-0.15, 0.15), rand(2, 6), randomFrom(palette));
                                 p.gravity = 0.05;
                                 particles.push(p);
                             }
@@ -235,13 +791,11 @@
                         const count = 120;
                         for (let i = 0; i < count; i++) {
                             const t = (i / count) * Math.PI * 2;
-                            // Heart parametric equations
                             const hx = 16 * Math.pow(Math.sin(t), 3);
                             const hy = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
                             const angle = Math.atan2(hy, hx);
                             const speed = Math.hypot(hx, hy) * 0.2;
-                            const p = new Particle(cx, cy, angle, speed, randomFrom(palette), rand(0.006, 0.014));
-                            particles.push(p);
+                            particles.push(new Particle(cx, cy, angle, speed, randomFrom(palette), rand(0.006, 0.014)));
                         }
                         break;
                     }
@@ -250,10 +804,7 @@
                         for (let a = 0; a < arms; a++) {
                             const baseAngle = (Math.PI * 2 / arms) * a;
                             for (let i = 0; i < 40; i++) {
-                                const angle = baseAngle + (i * 0.15);
-                                const speed = 1 + i * 0.1;
-                                const p = new Particle(cx, cy, angle, speed, randomFrom(palette), rand(0.008, 0.015));
-                                particles.push(p);
+                                particles.push(new Particle(cx, cy, baseAngle + i * 0.15, 1 + i * 0.1, randomFrom(palette), rand(0.008, 0.015)));
                             }
                         }
                         break;
@@ -264,8 +815,7 @@
                             const speed = ring === 0 ? rand(2.5, 3.5) : rand(4, 5.5);
                             const color = ring === 0 ? palette[0] : palette[palette.length - 1];
                             for (let i = 0; i < count; i++) {
-                                const angle = (Math.PI * 2 / count) * i;
-                                particles.push(new Particle(cx, cy, angle, speed, color));
+                                particles.push(new Particle(cx, cy, (Math.PI * 2 / count) * i, speed, color));
                             }
                         }
                         break;
@@ -273,9 +823,7 @@
                     case 'crossette': {
                         const count = 30;
                         for (let i = 0; i < count; i++) {
-                            const angle = (Math.PI * 2 / count) * i;
-                            const speed = rand(3, 5);
-                            const p = new Particle(cx, cy, angle, speed, randomFrom(palette), 0.015);
+                            const p = new Particle(cx, cy, (Math.PI * 2 / count) * i, rand(3, 5), randomFrom(palette), 0.015);
                             p.willSplit = true;
                             p.splitTimer = Math.floor(rand(15, 30));
                             particles.push(p);
@@ -285,11 +833,75 @@
                     case 'kamuro': {
                         const count = 250;
                         for (let i = 0; i < count; i++) {
-                            const angle = rand(0, Math.PI * 2);
-                            const speed = rand(0.5, 5);
-                            const p = new Particle(cx, cy, angle, speed, '#ffd700', rand(0.002, 0.006));
+                            const p = new Particle(cx, cy, rand(0, Math.PI * 2), rand(0.5, 5), '#ffd700', rand(0.002, 0.006));
                             p.gravity = 0.03;
                             p.size = rand(1, 2.5);
+                            particles.push(p);
+                        }
+                        break;
+                    }
+                    // Issue #8: Chinese Knot
+                    case 'chinese_knot': {
+                        const count = 160;
+                        for (let i = 0; i < count; i++) {
+                            const t = (i / count) * Math.PI * 2;
+                            // Diamond/knot parametric shape
+                            const r = 3 * (1 + 0.5 * Math.cos(4 * t));
+                            const kx = r * Math.cos(t);
+                            const ky = r * Math.sin(t);
+                            const angle = Math.atan2(ky, kx);
+                            const speed = Math.hypot(kx, ky) * 0.6;
+                            const p = new Particle(cx, cy, angle, speed, randomFrom(cnyPalette), rand(0.006, 0.012));
+                            particles.push(p);
+                        }
+                        break;
+                    }
+                    // Issue #8: Firecracker chain
+                    case 'firecracker': {
+                        const chainLength = Math.floor(rand(8, 15));
+                        for (let j = 0; j < chainLength; j++) {
+                            setTimeout(() => {
+                                const offsetY = cy + j * 15;
+                                const offsetX = cx + rand(-5, 5);
+                                playFirecrackerSound();
+                                for (let i = 0; i < 8; i++) {
+                                    const angle = rand(0, Math.PI * 2);
+                                    const p = new Particle(offsetX, offsetY, angle, rand(1, 2.5), randomFrom(cnyPalette), rand(0.02, 0.04), rand(1, 2));
+                                    particles.push(p);
+                                }
+                                glowOrbs.push({ x: offsetX, y: offsetY, radius: 3, maxRadius: 30, alpha: 0.6, color: '#ff0000' });
+                            }, j * rand(50, 100));
+                        }
+                        break;
+                    }
+                    // Issue #4: Text blessing firework
+                    case 'text_blessing': {
+                        const text = randomFrom(blessingTexts);
+                        const pixels = getTextPixels(text);
+                        const sampleStep = Math.max(1, Math.floor(pixels.length / 120));
+                        for (let i = 0; i < pixels.length; i += sampleStep) {
+                            const px = pixels[i];
+                            const targetX = cx + px.x;
+                            const targetY = cy + px.y;
+                            const angle = Math.atan2(px.y, px.x);
+                            const speed = Math.hypot(px.x, px.y) * 0.06;
+                            const p = new Particle(cx, cy, angle, speed, randomFrom(cnyPalette), rand(0.003, 0.008), rand(1.5, 2.5));
+                            p.gravity = 0.01;
+                            particles.push(p);
+                        }
+                        break;
+                    }
+                    // Issue #6: Snake-shaped firework
+                    case 'snake': {
+                        const snakeLen = 60;
+                        for (let i = 0; i < snakeLen; i++) {
+                            const t = i / snakeLen * Math.PI * 4;
+                            const sx = Math.cos(t) * (2 + i * 0.05);
+                            const sy = Math.sin(t * 2) * (1 + i * 0.03) - i * 0.1;
+                            const angle = Math.atan2(sy, sx);
+                            const speed = Math.hypot(sx, sy) * 0.8;
+                            const p = new Particle(cx, cy, angle, speed, i < 3 ? '#ff0000' : '#ffd700', rand(0.004, 0.01), rand(1.5, 3));
+                            p.gravity = 0.02;
                             particles.push(p);
                         }
                         break;
@@ -298,7 +910,6 @@
             }
 
             draw() {
-                // Trail glow
                 for (let i = 0; i < this.trail.length; i++) {
                     const t = this.trail[i];
                     if (t.alpha <= 0) continue;
@@ -307,8 +918,6 @@
                     ctx.fillStyle = `rgba(255, 220, 100, ${t.alpha * 0.6})`;
                     ctx.fill();
                 }
-
-                // Rocket head
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
                 ctx.fillStyle = '#fff';
@@ -344,15 +953,12 @@
                 this.y += this.vy;
                 this.alpha -= this.decay;
 
-                // Crossette split effect
                 if (this.willSplit) {
                     this.splitTimer--;
                     if (this.splitTimer <= 0) {
                         this.willSplit = false;
                         for (let i = 0; i < 6; i++) {
-                            const angle = rand(0, Math.PI * 2);
-                            const speed = rand(1, 3);
-                            particles.push(new Particle(this.x, this.y, angle, speed, this.color, rand(0.015, 0.03), rand(1, 2)));
+                            particles.push(new Particle(this.x, this.y, rand(0, Math.PI * 2), rand(1, 3), this.color, rand(0.015, 0.03), rand(1, 2)));
                         }
                     }
                 }
@@ -374,20 +980,27 @@
             }
         }
 
-        // Auto-launch timing
+        // ========== Auto-launch ==========
         let lastLaunch = 0;
         let launchInterval = 500;
         let burstMode = false;
         let burstTimer = 0;
 
-        // Periodically do a grand finale burst
         setInterval(() => {
             burstMode = true;
-            burstTimer = 60; // frames of rapid fire
+            burstTimer = 60;
         }, 12000);
 
-        // Click/tap to launch
+        // ========== Click/tap ==========
         canvas.addEventListener('click', (e) => {
+            initAudio();
+            // Check red packet clicks first
+            for (let i = redPackets.length - 1; i >= 0; i--) {
+                if (!redPackets[i].clicked && redPackets[i].hitTest(e.clientX, e.clientY)) {
+                    redPackets[i].onClick();
+                    return;
+                }
+            }
             const count = Math.floor(rand(3, 6));
             for (let i = 0; i < count; i++) {
                 const startX = rand(canvas.width * 0.2, canvas.width * 0.8);
@@ -395,19 +1008,96 @@
             }
         });
 
-        // Touch support
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
+            initAudio();
             for (const touch of e.touches) {
-                const count = Math.floor(rand(2, 5));
-                for (let i = 0; i < count; i++) {
-                    const startX = rand(canvas.width * 0.2, canvas.width * 0.8);
-                    rockets.push(new Rocket(startX, touch.clientX + rand(-80, 80), touch.clientY + rand(-50, 50)));
+                // Check red packet clicks
+                let hitPacket = false;
+                for (let i = redPackets.length - 1; i >= 0; i--) {
+                    if (!redPackets[i].clicked && redPackets[i].hitTest(touch.clientX, touch.clientY)) {
+                        redPackets[i].onClick();
+                        hitPacket = true;
+                        break;
+                    }
+                }
+                if (!hitPacket) {
+                    const count = Math.floor(rand(2, 5));
+                    for (let i = 0; i < count; i++) {
+                        const startX = rand(canvas.width * 0.2, canvas.width * 0.8);
+                        rockets.push(new Rocket(startX, touch.clientX + rand(-80, 80), touch.clientY + rand(-50, 50)));
+                    }
                 }
             }
         });
 
-        // Gradient sky
+        // ========== Issue #9: Countdown System ==========
+        const countdownEl = document.getElementById('countdown');
+        const happyNewYearEl = document.getElementById('happy-new-year');
+        const params = new URLSearchParams(window.location.search);
+        const countdownTarget = params.get('countdown');
+        let countdownActive = false;
+        let countdownFinished = false;
+
+        if (countdownTarget) {
+            const targetDate = new Date(countdownTarget);
+            if (!isNaN(targetDate.getTime())) {
+                countdownActive = true;
+                countdownEl.style.display = 'block';
+
+                function updateCountdown() {
+                    if (countdownFinished) return;
+                    const now = Date.now();
+                    const diff = targetDate.getTime() - now;
+
+                    if (diff <= 0) {
+                        countdownFinished = true;
+                        countdownEl.style.display = 'none';
+                        happyNewYearEl.style.display = 'block';
+                        setTimeout(() => { happyNewYearEl.style.opacity = '1'; }, 50);
+
+                        // Grand Finale
+                        burstMode = true;
+                        burstTimer = 300;
+                        playBellSound();
+                        // Golden flash
+                        glowOrbs.push({ x: canvas.width / 2, y: canvas.height / 2, radius: 10, maxRadius: Math.max(canvas.width, canvas.height), alpha: 0.6, color: '#ffd700' });
+
+                        // Hide after 10s
+                        setTimeout(() => {
+                            happyNewYearEl.style.opacity = '0';
+                            setTimeout(() => { happyNewYearEl.style.display = 'none'; }, 1000);
+                        }, 10000);
+                        return;
+                    }
+
+                    const totalSeconds = Math.ceil(diff / 1000);
+                    const days = Math.floor(totalSeconds / 86400);
+                    const hours = Math.floor((totalSeconds % 86400) / 3600);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                    const seconds = totalSeconds % 60;
+
+                    if (totalSeconds <= 10) {
+                        countdownEl.classList.add('last-ten');
+                        countdownEl.style.fontSize = `${3 + (10 - totalSeconds) * 0.5}em`;
+                        countdownEl.textContent = totalSeconds;
+                        if (totalSeconds <= 3) playBellSound();
+                    } else if (days > 0) {
+                        countdownEl.textContent = `${days}天 ${hours}时 ${minutes}分 ${seconds}秒`;
+                    } else if (hours > 0) {
+                        countdownEl.textContent = `${hours}时 ${minutes}分 ${seconds}秒`;
+                    } else {
+                        countdownEl.textContent = `${minutes}分 ${seconds}秒`;
+                    }
+
+                    requestAnimationFrame(updateCountdown);
+                }
+                updateCountdown();
+                setInterval(updateCountdown, 200);
+            }
+        }
+
+        // ========== Sky ==========
         function drawSky() {
             const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
             gradient.addColorStop(0, 'rgba(0, 0, 20, 0.2)');
@@ -417,23 +1107,18 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
+        // ========== Main Animation Loop ==========
         function animate(timestamp) {
             drawSky();
             drawStars();
+            drawLanterns(timestamp);
 
-            // Update and draw glow orbs (flash effects)
+            // Glow orbs
             for (let i = glowOrbs.length - 1; i >= 0; i--) {
                 const orb = glowOrbs[i];
                 orb.radius += (orb.maxRadius - orb.radius) * 0.1;
                 orb.alpha *= 0.92;
-                if (orb.alpha < 0.01) {
-                    glowOrbs.splice(i, 1);
-                    continue;
-                }
-                const grad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius);
-                grad.addColorStop(0, orb.color.replace(')', `, ${orb.alpha})`).replace('rgb', 'rgba').replace('#', ''));
-                grad.addColorStop(1, 'transparent');
-                // Simpler approach for hex colors
+                if (orb.alpha < 0.01) { glowOrbs.splice(i, 1); continue; }
                 ctx.globalAlpha = orb.alpha * 0.3;
                 ctx.beginPath();
                 ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
@@ -442,34 +1127,54 @@
                 ctx.globalAlpha = 1;
             }
 
+            // Red packets (Issue #2)
+            redPacketTimer++;
+            if (redPacketTimer >= RED_PACKET_INTERVAL && redPackets.filter(r => !r.clicked).length < 8) {
+                redPacketTimer = 0;
+                redPackets.push(new RedPacket());
+            }
+            for (let i = redPackets.length - 1; i >= 0; i--) {
+                redPackets[i].update();
+                redPackets[i].draw();
+                if (!redPackets[i].alive) redPackets.splice(i, 1);
+            }
+
+            // Snakes (Issue #6)
+            snakeTimer++;
+            if (snakeTimer >= SNAKE_INTERVAL && snakes.length < 2) {
+                snakeTimer = 0;
+                snakes.push(new Snake());
+            }
+            for (let i = snakes.length - 1; i >= 0; i--) {
+                snakes[i].update();
+                snakes[i].draw();
+                if (!snakes[i].alive) snakes.splice(i, 1);
+            }
+
             // Auto-launch rockets
             if (burstMode) {
                 burstTimer--;
                 if (burstTimer <= 0) burstMode = false;
                 if (timestamp - lastLaunch > 80) {
                     const count = Math.floor(rand(2, 5));
-                    for (let i = 0; i < count; i++) {
-                        rockets.push(new Rocket());
-                    }
+                    for (let i = 0; i < count; i++) rockets.push(new Rocket());
                     lastLaunch = timestamp;
                 }
             } else if (timestamp - lastLaunch > launchInterval) {
                 const count = Math.floor(rand(1, 3));
-                for (let i = 0; i < count; i++) {
-                    rockets.push(new Rocket());
-                }
+                for (let i = 0; i < count; i++) rockets.push(new Rocket());
                 lastLaunch = timestamp;
                 launchInterval = rand(300, 800);
             }
 
-            // Update and draw rockets
+            // Rockets
             for (let i = rockets.length - 1; i >= 0; i--) {
                 rockets[i].update();
                 rockets[i].draw();
                 if (!rockets[i].alive) rockets.splice(i, 1);
             }
 
-            // Update and draw particles
+            // Particles
             for (let i = particles.length - 1; i >= 0; i--) {
                 particles[i].update();
                 particles[i].draw();
