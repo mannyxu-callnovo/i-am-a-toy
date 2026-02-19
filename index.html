@@ -181,9 +181,9 @@
     <div id="hint">Click or tap anywhere to launch fireworks</div>
 
     <!-- Issue #7: Couplets and Fu -->
-    <div class="couplet couplet-left">金蛇狂舞迎新岁</div>
-    <div class="couplet couplet-right">紫燕高飞报早春</div>
-    <div id="横批">蛇年大吉</div>
+    <div class="couplet couplet-left">骏马奔腾迎新岁</div>
+    <div class="couplet couplet-right">春风送暖入万家</div>
+    <div id="横批">马年大吉</div>
     <div id="fu-char">福</div>
 
     <!-- Issue #5: Sound toggle -->
@@ -191,7 +191,7 @@
 
     <!-- Issue #9: Countdown -->
     <div id="countdown"></div>
-    <div id="happy-new-year">🎊 新年快乐 🎊<br><span style="font-size:0.5em">蛇年大吉 · 恭喜发财</span></div>
+    <div id="happy-new-year">🎊 新年快乐 🎊<br><span style="font-size:0.5em">马年大吉 · 恭喜发财</span></div>
 
     <canvas id="fireworks"></canvas>
 
@@ -212,7 +212,7 @@
         const glowOrbs = [];
         const redPackets = [];
         const lanterns = [];
-        const snakes = [];
+        const horses = [];
 
         // ========== Issue #5: Sound System ==========
         let audioCtx = null;
@@ -559,7 +559,7 @@
             }
 
             onClick() {
-                const messages = ['恭喜发财', '万事如意', '蛇年大吉', '新年快乐', '阖家幸福', '财源广进'];
+                const messages = ['恭喜发财', '万事如意', '马年大吉', '新年快乐', '阖家幸福', '财源广进'];
                 this.clicked = true;
                 this.clickMessage = randomFrom(messages);
                 this.clickAlpha = 1.5;
@@ -576,89 +576,162 @@
         let redPacketTimer = 0;
         const RED_PACKET_INTERVAL = 400;
 
-        // ========== Issue #6: Snake Class ==========
-        class Snake {
+        // ========== Issue #6: Horse Class (马年) ==========
+        class Horse {
             constructor() {
-                this.segments = [];
-                const startX = Math.random() < 0.5 ? -20 : canvas.width + 20;
-                const startY = rand(canvas.height * 0.1, canvas.height * 0.5);
+                const startX = Math.random() < 0.5 ? -60 : canvas.width + 60;
+                this.x = startX;
+                this.y = rand(canvas.height * 0.3, canvas.height * 0.6);
                 this.direction = startX < 0 ? 1 : -1;
-                this.speed = rand(2, 3.5);
-                this.amplitude = rand(30, 60);
-                this.frequency = rand(0.03, 0.06);
+                this.speed = rand(4, 7);
                 this.phase = 0;
-                this.segmentCount = 30;
+                this.gallopSpeed = rand(0.12, 0.18);
                 this.alive = true;
-                this.baseY = startY;
-
-                for (let i = 0; i < this.segmentCount; i++) {
-                    this.segments.push({ x: startX - i * 8 * this.direction, y: startY });
-                }
+                this.trail = [];
+                this.sparkTimer = 0;
             }
 
             update() {
-                this.phase += this.frequency;
-                const head = this.segments[0];
-                head.x += this.speed * this.direction;
-                head.y = this.baseY + Math.sin(this.phase) * this.amplitude;
+                this.phase += this.gallopSpeed;
+                // Galloping motion: bounding up and down
+                const gallopY = Math.abs(Math.sin(this.phase)) * -25;
+                this.x += this.speed * this.direction;
+                this.y += gallopY * 0.15;
 
-                for (let i = 1; i < this.segments.length; i++) {
-                    const prev = this.segments[i - 1];
-                    const seg = this.segments[i];
-                    const dx = prev.x - seg.x;
-                    const dy = prev.y - seg.y;
-                    const dist = Math.hypot(dx, dy);
-                    if (dist > 8) {
-                        seg.x += (dx / dist) * (dist - 8);
-                        seg.y += (dy / dist) * (dist - 8);
-                    }
+                // Spark trail from hooves
+                this.sparkTimer++;
+                if (this.sparkTimer % 3 === 0) {
+                    this.trail.push({
+                        x: this.x - this.direction * 15,
+                        y: this.y + 12,
+                        alpha: 1,
+                        size: rand(1, 3)
+                    });
+                    if (this.trail.length > 20) this.trail.shift();
                 }
+                this.trail.forEach(t => t.alpha -= 0.05);
 
-                if ((this.direction > 0 && head.x > canvas.width + 50) ||
-                    (this.direction < 0 && head.x < -50)) {
+                if ((this.direction > 0 && this.x > canvas.width + 80) ||
+                    (this.direction < 0 && this.x < -80)) {
                     this.alive = false;
                 }
             }
 
             draw() {
                 ctx.save();
-                for (let i = this.segments.length - 1; i >= 0; i--) {
-                    const seg = this.segments[i];
-                    const t = 1 - i / this.segments.length;
-                    const size = 2 + t * 4;
-                    const alpha = 0.3 + t * 0.7;
+                const gallopBob = Math.sin(this.phase) * 5;
+                const legPhase = this.phase;
 
+                // Trail sparks (hoofprints)
+                for (const t of this.trail) {
+                    if (t.alpha <= 0) continue;
                     ctx.beginPath();
-                    ctx.arc(seg.x, seg.y, size, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
-                    ctx.shadowBlur = 8;
+                    ctx.arc(t.x, t.y, t.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 215, 0, ${t.alpha * 0.6})`;
+                    ctx.shadowBlur = 5;
                     ctx.shadowColor = '#ffd700';
                     ctx.fill();
                 }
-                // Eyes on head
-                const head = this.segments[0];
                 ctx.shadowBlur = 0;
-                ctx.fillStyle = '#ff0000';
+
+                const hx = this.x;
+                const hy = this.y + gallopBob;
+                const dir = this.direction;
+
+                ctx.globalAlpha = 0.8;
+
+                // Body (ellipse)
                 ctx.beginPath();
-                ctx.arc(head.x + this.direction * 3, head.y - 3, 1.5, 0, Math.PI * 2);
-                ctx.arc(head.x + this.direction * 3, head.y + 3, 1.5, 0, Math.PI * 2);
+                ctx.ellipse(hx, hy, 22, 12, 0, 0, Math.PI * 2);
+                const bodyGrad = ctx.createRadialGradient(hx, hy - 3, 0, hx, hy, 15);
+                bodyGrad.addColorStop(0, '#ffd700');
+                bodyGrad.addColorStop(1, '#cc8800');
+                ctx.fillStyle = bodyGrad;
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = '#ffd700';
                 ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // Head
+                ctx.beginPath();
+                ctx.ellipse(hx + dir * 25, hy - 8, 8, 10, dir * -0.3, 0, Math.PI * 2);
+                ctx.fillStyle = '#e6b800';
+                ctx.fill();
+
+                // Eye
+                ctx.beginPath();
+                ctx.arc(hx + dir * 28, hy - 11, 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#330000';
+                ctx.fill();
+
+                // Ear
+                ctx.beginPath();
+                ctx.moveTo(hx + dir * 25, hy - 18);
+                ctx.lineTo(hx + dir * 28, hy - 25);
+                ctx.lineTo(hx + dir * 22, hy - 20);
+                ctx.fillStyle = '#cc8800';
+                ctx.fill();
+
+                // Mane (flowing hair)
+                ctx.strokeStyle = '#ff6600';
+                ctx.lineWidth = 2;
+                for (let i = 0; i < 6; i++) {
+                    const mx = hx + dir * (15 - i * 4);
+                    const maneWave = Math.sin(this.phase + i * 0.5) * 4;
+                    ctx.beginPath();
+                    ctx.moveTo(mx, hy - 12);
+                    ctx.quadraticCurveTo(mx - dir * 5, hy - 20 + maneWave, mx - dir * 10, hy - 15 + maneWave);
+                    ctx.stroke();
+                }
+
+                // Legs (galloping animation)
+                ctx.strokeStyle = '#cc8800';
+                ctx.lineWidth = 3;
+                const legOffsets = [
+                    { x: -10, phase: 0 },
+                    { x: -5, phase: Math.PI * 0.5 },
+                    { x: 8, phase: Math.PI },
+                    { x: 13, phase: Math.PI * 1.5 }
+                ];
+                for (const leg of legOffsets) {
+                    const lx = hx + dir * leg.x;
+                    const legSwing = Math.sin(legPhase + leg.phase) * 8;
+                    ctx.beginPath();
+                    ctx.moveTo(lx, hy + 10);
+                    ctx.lineTo(lx + legSwing * dir * 0.5, hy + 22 + Math.abs(legSwing) * 0.3);
+                    ctx.stroke();
+                }
+
+                // Tail (flowing)
+                ctx.strokeStyle = '#ff6600';
+                ctx.lineWidth = 2;
+                for (let i = 0; i < 4; i++) {
+                    const tailWave = Math.sin(this.phase * 0.8 + i * 0.4) * 6;
+                    ctx.beginPath();
+                    ctx.moveTo(hx - dir * 20, hy);
+                    ctx.quadraticCurveTo(
+                        hx - dir * (30 + i * 3), hy + tailWave,
+                        hx - dir * (38 + i * 5), hy - 5 + tailWave * 1.5
+                    );
+                    ctx.stroke();
+                }
+
                 ctx.restore();
             }
         }
 
-        let snakeTimer = 0;
-        const SNAKE_INTERVAL = 600;
+        let horseTimer = 0;
+        const HORSE_INTERVAL = 500;
 
         // ========== Explosion Types ==========
         const EXPLOSION_TYPES = [
             'spherical', 'ring', 'chrysanthemum', 'willow', 'palm',
             'heart', 'spiral', 'double_ring', 'crossette', 'kamuro',
-            'chinese_knot', 'firecracker', 'text_blessing', 'snake'
+            'chinese_knot', 'firecracker', 'text_blessing', 'horse'
         ];
 
         // Issue #4: Text blessing helpers
-        const blessingTexts = ['新年快乐', '恭喜发财', '蛇年大吉', '万事如意', '阖家幸福'];
+        const blessingTexts = ['新年快乐', '恭喜发财', '马年大吉', '万事如意', '阖家幸福', '马到成功'];
         const offscreenCanvas = document.createElement('canvas');
         const offscreenCtx = offscreenCanvas.getContext('2d');
         offscreenCanvas.width = 200;
@@ -891,18 +964,40 @@
                         }
                         break;
                     }
-                    // Issue #6: Snake-shaped firework
-                    case 'snake': {
-                        const snakeLen = 60;
-                        for (let i = 0; i < snakeLen; i++) {
-                            const t = i / snakeLen * Math.PI * 4;
-                            const sx = Math.cos(t) * (2 + i * 0.05);
-                            const sy = Math.sin(t * 2) * (1 + i * 0.03) - i * 0.1;
-                            const angle = Math.atan2(sy, sx);
-                            const speed = Math.hypot(sx, sy) * 0.8;
-                            const p = new Particle(cx, cy, angle, speed, i < 3 ? '#ff0000' : '#ffd700', rand(0.004, 0.01), rand(1.5, 3));
-                            p.gravity = 0.02;
-                            particles.push(p);
+                    // Issue #6: Horse-shaped firework (马年)
+                    case 'horse': {
+                        // Galloping horse silhouette using particle bursts
+                        // Body arc
+                        for (let i = 0; i < 40; i++) {
+                            const t = (i / 40) * Math.PI;
+                            const hx = Math.cos(t) * 3;
+                            const hy = Math.sin(t) * -1.5;
+                            const angle = Math.atan2(hy, hx);
+                            const speed = Math.hypot(hx, hy) * 1.2;
+                            particles.push(new Particle(cx, cy, angle, speed, '#ffd700', rand(0.005, 0.01), rand(2, 3)));
+                        }
+                        // Head (upper right burst)
+                        for (let i = 0; i < 20; i++) {
+                            const angle = rand(-Math.PI * 0.8, -Math.PI * 0.2);
+                            const speed = rand(3, 5);
+                            particles.push(new Particle(cx + 20, cy - 10, angle, speed, '#e6b800', rand(0.008, 0.014), rand(1.5, 2.5)));
+                        }
+                        // Legs (downward streaks)
+                        for (let leg = 0; leg < 4; leg++) {
+                            const lx = cx - 15 + leg * 10;
+                            for (let i = 0; i < 8; i++) {
+                                const angle = Math.PI * 0.5 + rand(-0.3, 0.3);
+                                const speed = rand(2, 4);
+                                const p = new Particle(lx, cy + 5, angle, speed, '#cc8800', rand(0.012, 0.02), rand(1, 2));
+                                p.gravity = 0.06;
+                                particles.push(p);
+                            }
+                        }
+                        // Mane & tail (flowing sparks)
+                        for (let i = 0; i < 25; i++) {
+                            const angle = rand(Math.PI * 0.6, Math.PI * 1.2);
+                            const speed = rand(2, 5);
+                            particles.push(new Particle(cx - 15, cy - 5, angle, speed, '#ff6600', rand(0.006, 0.012), rand(1.5, 3)));
                         }
                         break;
                     }
@@ -1139,16 +1234,16 @@
                 if (!redPackets[i].alive) redPackets.splice(i, 1);
             }
 
-            // Snakes (Issue #6)
-            snakeTimer++;
-            if (snakeTimer >= SNAKE_INTERVAL && snakes.length < 2) {
-                snakeTimer = 0;
-                snakes.push(new Snake());
+            // Horses (Issue #6 - 马年)
+            horseTimer++;
+            if (horseTimer >= HORSE_INTERVAL && horses.length < 2) {
+                horseTimer = 0;
+                horses.push(new Horse());
             }
-            for (let i = snakes.length - 1; i >= 0; i--) {
-                snakes[i].update();
-                snakes[i].draw();
-                if (!snakes[i].alive) snakes.splice(i, 1);
+            for (let i = horses.length - 1; i >= 0; i--) {
+                horses[i].update();
+                horses[i].draw();
+                if (!horses[i].alive) horses.splice(i, 1);
             }
 
             // Auto-launch rockets
